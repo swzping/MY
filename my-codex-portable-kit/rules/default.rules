@@ -1,0 +1,8 @@
+prefix_rule(pattern=["npm", "start"], decision="allow")
+prefix_rule(pattern=["npm", "run", "dev"], decision="allow")
+prefix_rule(pattern=["curl"], decision="allow")
+prefix_rule(pattern=["npm", "run", "deploy"], decision="allow")
+prefix_rule(pattern=["git", "ls-remote"], decision="allow")
+prefix_rule(pattern=["open"], decision="allow")
+prefix_rule(pattern=["xcodebuild"], decision="allow")
+prefix_rule(pattern=["xcrun", "simctl"], decision="allow")

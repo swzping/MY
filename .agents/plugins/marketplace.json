@@ -1,0 +1,20 @@
+{
+  "name": "my-local",
+  "interface": {
+    "displayName": "MY Local"
+  },
+  "plugins": [
+    {
+      "name": "bright-path",
+      "source": {
+        "source": "local",
+        "path": "./plugins/bright-path"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Productivity"
+    }
+  ]
+}

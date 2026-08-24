@@ -1,0 +1,8 @@
+version = 1
+id = "automation"
+kind = "heartbeat"
+name = "每小时工作待办提醒"
+prompt = "提醒我查看并更新 <MY_WORKSPACE>/工作待办.md 里的工作待办事项，重点关注未完成条目，例如“部署你的本地模型”。请简短询问当前进展、是否需要继续推进、是否有新的待办要记录，并给出下一步最小行动建议。"
+status = "PAUSED"
+rrule = "FREQ=HOURLY;INTERVAL=1"
+target_thread_id = "<replace-with-target-thread-id>"

@@ -1,0 +1,29 @@
+{
+  "name": "bright-path",
+  "version": "0.1.1+codex.20260715092747",
+  "description": "一个面向希望与行动的个人规划插件，把零散想法整理成清晰下一步。",
+  "author": {
+    "name": "守望"
+  },
+  "skills": "./skills/",
+  "mcpServers": "./.mcp.json",
+  "interface": {
+    "displayName": "Bright Path",
+    "shortDescription": "把零散想法整理成清晰的前进路径。",
+    "longDescription": "Bright Path 帮助 Codex 用温和、务实、带有希望感的方式整理想法、决策、复盘与计划，并转化为具体下一步。",
+    "developerName": "守望",
+    "category": "Productivity",
+    "capabilities": [
+      "Read",
+      "Interactive"
+    ],
+    "defaultPrompt": [
+      "使用 Bright Path 帮我整理这个想法。",
+      "使用 Bright Path 帮我制定下一步计划。",
+      "使用 Bright Path 帮我复盘今天学到的东西。"
+    ],
+    "brandColor": "#f5b84b",
+    "composerIcon": "./assets/icon.svg",
+    "logo": "./assets/logo.svg"
+  }
+}

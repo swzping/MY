@@ -1,0 +1,29 @@
+{
+  "expo": {
+    "name": "记账",
+    "slug": "jizhang",
+    "version": "0.1.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "splash": {
+      "image": "./assets/splash/splash-1.jpg",
+      "resizeMode": "cover",
+      "backgroundColor": "#10100f"
+    },
+    "assetBundlePatterns": ["**/*"],
+    "ios": {
+      "bundleIdentifier": "com.edy.jizhang",
+      "supportsTablet": true
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/icon.png",
+        "backgroundColor": "#f7faf9"
+      }
+    },
+    "web": {
+      "bundler": "metro"
+    }
+  }
+}

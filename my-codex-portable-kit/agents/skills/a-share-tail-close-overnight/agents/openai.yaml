@@ -1,0 +1,4 @@
+interface:
+  display_name: "尾盘隔夜策略"
+  short_description: "每日更新A股主板尾盘隔夜纸面推荐验证复盘滚动报告优化"
+  default_prompt: "Use $a-share-tail-close-overnight to update today recommendation, next-day validation, and rolling strategy report."

@@ -1,0 +1,11 @@
+version = 1
+id = "9-30"
+kind = "cron"
+name = "每日9:30更新今日新闻"
+prompt = "更新学习记录中的今日新闻与趋势判断。请以当前日期为准，联网查找当天最新且重要的 AI 圈新闻、AI/技术更新、社会热点、行业热点和经济热点，优先使用可靠来源并保留链接。按现有框架写入 `news-trends/daily/YYYY-MM-DD.md`：包含今日总览表、每条新闻的来源、分类、事实、机制、职业影响、经济影响、后续行动，以及今日个人判断和今日行动。更新 `news-trends/README.md` 的“每日记录”列表，加入当天记录链接；如果当天文件已存在，则更新而不是重复创建。"
+status = "PAUSED"
+rrule = "FREQ=DAILY;BYHOUR=9;BYMINUTE=30;BYSECOND=0"
+model = "gpt-5.4"
+reasoning_effort = "medium"
+execution_environment = "local"
+cwds = ["<MY_WORKSPACE>/study"]

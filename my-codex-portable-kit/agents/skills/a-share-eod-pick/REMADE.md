@@ -1,0 +1,4 @@
+- 执行时 若无推荐票，则应根据候选票趋势，给出下一次执行时机建议，比如当前价位不合适，但是根据走势，可以执行看10点的情况python3 scripts/main.py train_history
+- 可以加一个模块 显示收益高 会冲高，也提示风险的
+- python3 scripts/main.py run_today_report --f2-min 20 --score-min 40 --f8-min 50 --f9-min 30
+- python3 scripts/main.py run_today_report --mode tail-only(attack, balanced)

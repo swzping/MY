@@ -1,0 +1,33 @@
+{
+  "version": 3,
+  "skills": {
+    "find-skills": {
+      "source": "vercel-labs/skills",
+      "sourceType": "github",
+      "sourceUrl": "https://github.com/vercel-labs/skills.git",
+      "skillPath": "skills/find-skills/SKILL.md",
+      "skillFolderHash": "c2f31172b6f256272305a5e6e7228b258446899f",
+      "installedAt": "2026-03-06T03:34:37.006Z",
+      "updatedAt": "2026-03-06T03:34:37.006Z"
+    },
+    "technical-analysis": {
+      "source": "ismxy0934/qing-skills",
+      "sourceType": "github",
+      "sourceUrl": "https://github.com/ismxy0934/qing-skills.git",
+      "skillPath": "skills/technical-analysis/SKILL.md",
+      "skillFolderHash": "f296d101d74afcc7df3e3370d334a7f6f912263a",
+      "installedAt": "2026-06-19T01:09:40.952Z",
+      "updatedAt": "2026-06-19T01:09:40.952Z"
+    },
+    "a-stock-data": {
+      "source": "simonlin1212/a-stock-data",
+      "sourceType": "github",
+      "sourceUrl": "https://github.com/simonlin1212/a-stock-data.git",
+      "skillPath": "SKILL.md",
+      "skillFolderHash": "e40d0655793437aacf8f38f9fc1db0628d50a632",
+      "installedAt": "2026-06-22T01:51:16.676Z",
+      "updatedAt": "2026-06-22T01:51:16.676Z"
+    }
+  },
+  "dismissed": {}
+}

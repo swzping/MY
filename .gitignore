@@ -1,0 +1,72 @@
+# macOS / editor
+.DS_Store
+._*
+.Spotlight-V100/
+.Trashes/
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Environment / secrets
+.env
+.env.*
+!.env.example
+*.local
+
+# Node / frontend / Electron
+node_modules/
+node_modules
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+.npm/
+.pnpm-store/
+.vite/
+dist/
+dist-electron/
+build/
+release/
+out/
+coverage/
+*.tsbuildinfo
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.venv/
+venv/
+env/
+
+# Generated data and caches
+cache/
+data/cache/
+*.inspect.ndjson
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+*.bak
+*.orig
+.superpowers/
+
+# Large local media exports
+*.mp4
+*.mov
+*.m4v
+*.avi
+*.mkv
+*.wav
+*.mp3
+*.aiff
+
+# Keep placeholder docs even inside ignored media folders
+!**/PUT_*.md
+!**/EXPORTS_GO_HERE.md
+

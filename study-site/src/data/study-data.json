@@ -1,0 +1,2774 @@
+{
+  "generatedAt": "2026-07-02T03:39:13.759Z",
+  "documents": [
+    {
+      "path": "study/ai-tools/agent-engineering.md",
+      "title": "Agent 工程总览",
+      "summary": "这里整理 LangGraph、MCP、Skill、Agent、Tool、Memory、Workflow 等概念之间的关系。可以把它理解成一张地图：不同技术不是互相替代，而是分别解决 ...",
+      "category": "term"
+    },
+    {
+      "path": "study/ai-tools/agent-stack-playbook.md",
+      "title": "Agent Stack 实战手册",
+      "summary": "这篇用来做决策：遇到一个 AI / Agent 需求时，应该写普通脚本、写 Skill、接 MCP，还是上 LangGraph。",
+      "category": "term"
+    },
+    {
+      "path": "study/ai-tools/ai-friendly-project-structure.md",
+      "title": "利于 AI 协作的项目目录结构",
+      "summary": "这里记录适合 AI agent、coding agent 和多人协作的项目结构。重点不是追求文件越多越好，而是让 AI 能快速理解项目、遵守边界、执行验证、沉淀经验。",
+      "category": "term"
+    },
+    {
+      "path": "study/ai-tools/glossary.md",
+      "title": "AI 工具术语表",
+      "summary": "一句话解释：`HyperFrames` 是 HeyGen 开源的 HTML/CSS/JavaScript 转视频框架，让 AI 编程代理可以通过写网页式代码来生成、预览和渲染 MP4...",
+      "category": "term"
+    },
+    {
+      "path": "study/ai-tools/langgraph-notes.md",
+      "title": "LangGraph 笔记",
+      "summary": "一句话解释：`LangGraph` 是 LangChain 生态里的 Agent / workflow 编排框架，用图结构把 LLM、工具、状态、分支、循环和多 Agent 协作组织...",
+      "category": "term"
+    },
+    {
+      "path": "study/ai-tools/mcp-notes.md",
+      "title": "MCP 笔记",
+      "summary": "一句话解释：`MCP`，Model Context Protocol，是一种让 AI 应用以统一方式连接外部工具、数据源、资源和提示词的开放协议。",
+      "category": "term"
+    },
+    {
+      "path": "study/ai-tools/people-and-resources.md",
+      "title": "AI 工具人物与资源",
+      "summary": "这里记录值得关注的开发者、项目作者、资料源和 GitHub 账号，方便后续回看其项目、思路和工具生态。",
+      "category": "resource"
+    },
+    {
+      "path": "study/ai-tools/platforms.md",
+      "title": "AI 工具平台案例",
+      "summary": "这里记录值得观察的 AI 工具平台、模型聚合站、API 中转服务和产品化案例。重点不是背功能清单，而是判断它们在 AI 工具生态里的位置。",
+      "category": "term"
+    },
+    {
+      "path": "study/ai-tools/projects.md",
+      "title": "AI 工具开源项目案例",
+      "summary": "这里记录值得学习的 AI 开源项目。重点关注：项目解决什么问题、技术结构是什么、适合学习什么、不适合误用成什么。",
+      "category": "project"
+    },
+    {
+      "path": "study/ai-tools/README.md",
+      "title": "AI 工具学习地图",
+      "summary": "这里整理 AI 工具、Agent 工程、平台案例、开源项目和项目结构规范。重点不是追热点名词，而是判断：它解决什么问题、适合放在系统哪一层、什么时候值得自己动手用。",
+      "category": "term"
+    },
+    {
+      "path": "study/ai-tools/skills-notes.md",
+      "title": "Skills 笔记",
+      "summary": "一句话解释：`Skill` 是给 AI agent 的可复用能力包，通常包含任务说明、工作流程、检查清单、参考资料、模板和脚本，让 AI 在处理某一类任务时更稳定。",
+      "category": "term"
+    },
+    {
+      "path": "study/ai-tools/templates/agent-project-structure.md",
+      "title": "Agent 项目结构模板",
+      "summary": "这个模板适合创建 AI Agent、MCP server、Skill、LangGraph workflow 或混合型项目。实际使用时不必全部创建，按项目复杂度逐步增加。",
+      "category": "project"
+    },
+    {
+      "path": "study/ai-tools/tradingagents-notes.md",
+      "title": "TradingAgents 项目整理",
+      "summary": "> 项目：TauricResearch/TradingAgents",
+      "category": "project"
+    },
+    {
+      "path": "study/news-trends/career-economy-framework.md",
+      "title": "职业与经济方向判断框架",
+      "summary": "看到一条新闻或技术更新时，不只问“它火不火”，而是问：它会改变谁的工作、谁的收入、谁的成本、谁的机会。",
+      "category": "trend"
+    },
+    {
+      "path": "study/news-trends/classification.md",
+      "title": "信息分类方法",
+      "summary": "日常信息可以先分成五类：",
+      "category": "trend"
+    },
+    {
+      "path": "study/news-trends/daily/2026-06-23.md",
+      "title": "2026-06-23 今日新闻与趋势记录",
+      "summary": "> 目标：不是追所有热点，而是筛出对职业方向、行业机会和经济判断有用的信息。",
+      "category": "trend"
+    },
+    {
+      "path": "study/news-trends/daily/2026-06-24.md",
+      "title": "2026-06-24 今日新闻与趋势记录",
+      "summary": "> 目标：不是追所有热点，而是筛出对职业方向、行业机会和经济判断有用的信息。",
+      "category": "trend"
+    },
+    {
+      "path": "study/news-trends/daily/2026-06-26.md",
+      "title": "2026-06-26 今日新闻与趋势记录",
+      "summary": "> 目标：不是追所有热点，而是筛出对职业方向、行业机会和经济判断有用的信息。",
+      "category": "trend"
+    },
+    {
+      "path": "study/news-trends/daily/2026-06-28.md",
+      "title": "2026-06-28 今日新闻与趋势记录",
+      "summary": "> 目标：不是追所有热点，而是筛出对职业方向、行业机会和经济判断有用的信息。",
+      "category": "trend"
+    },
+    {
+      "path": "study/news-trends/daily/2026-06-29.md",
+      "title": "2026-06-29 今日新闻与趋势记录",
+      "summary": "> 目标：不是追所有热点，而是筛出对职业方向、行业机会和经济判断有用的信息。",
+      "category": "trend"
+    },
+    {
+      "path": "study/news-trends/daily/2026-06-30.md",
+      "title": "2026-06-30 今日新闻与趋势记录",
+      "summary": "> 目标：不是追所有热点，而是筛出对职业方向、行业机会和经济判断有用的信息。",
+      "category": "trend"
+    },
+    {
+      "path": "study/news-trends/daily/2026-07-01.md",
+      "title": "2026-07-01 今日新闻与趋势记录",
+      "summary": "> 目标：不是追所有热点，而是筛出对职业方向、行业机会和经济判断有用的信息。",
+      "category": "trend"
+    },
+    {
+      "path": "study/news-trends/daily/2026-07-02.md",
+      "title": "2026-07-02 今日新闻与趋势记录",
+      "summary": "> 目标：不是追所有热点，而是筛出对职业方向、行业机会和经济判断有用的信息。",
+      "category": "trend"
+    },
+    {
+      "path": "study/news-trends/README.md",
+      "title": "新闻、技术与趋势判断",
+      "summary": "这个目录用来区分不同类型的信息，并把日常新闻沉淀成职业方向、经济发展方向和学习重点的判断。",
+      "category": "trend"
+    },
+    {
+      "path": "study/README.md",
+      "title": "学习记录",
+      "summary": "这里用来整理学习过程中遇到的概念、术语、工具和参考资料。",
+      "category": "term"
+    }
+  ],
+  "tags": [
+    {
+      "name": "观察",
+      "category": "action",
+      "description": "需要可恢复、可观察、可调试的执行路径。",
+      "weight": 23,
+      "sources": [
+        "study/ai-tools/agent-engineering.md",
+        "study/ai-tools/agent-stack-playbook.md",
+        "study/ai-tools/glossary.md",
+        "study/ai-tools/langgraph-notes.md",
+        "study/ai-tools/people-and-resources.md",
+        "study/ai-tools/platforms.md",
+        "study/ai-tools/projects.md",
+        "study/ai-tools/skills-notes.md",
+        "study/ai-tools/tradingagents-notes.md",
+        "study/news-trends/career-economy-framework.md",
+        "study/news-trends/daily/2026-06-23.md",
+        "study/news-trends/daily/2026-06-24.md",
+        "study/news-trends/daily/2026-06-26.md",
+        "study/news-trends/daily/2026-06-28.md",
+        "study/news-trends/daily/2026-06-29.md",
+        "study/news-trends/daily/2026-06-30.md",
+        "study/news-trends/daily/2026-07-01.md",
+        "study/news-trends/daily/2026-07-02.md",
+        "study/README.md"
+      ],
+      "related": [
+        "LLM",
+        "Planner",
+        "Sandbox",
+        "Model Context",
+        "MCP",
+        "Skill"
+      ]
+    },
+    {
+      "name": "MCP",
+      "category": "term",
+      "description": "MCP 是能力接入协议，让 AI 客户端以统一方式访问工具、资源和外部系统。",
+      "weight": 19,
+      "sources": [
+        "study/ai-tools/agent-engineering.md",
+        "study/ai-tools/agent-stack-playbook.md",
+        "study/ai-tools/ai-friendly-project-structure.md",
+        "study/ai-tools/glossary.md",
+        "study/ai-tools/langgraph-notes.md",
+        "study/ai-tools/mcp-notes.md",
+        "study/ai-tools/people-and-resources.md",
+        "study/ai-tools/projects.md",
+        "study/ai-tools/README.md",
+        "study/ai-tools/skills-notes.md",
+        "study/ai-tools/templates/agent-project-structure.md",
+        "study/ai-tools/tradingagents-notes.md",
+        "https://modelcontextprotocol.io/docs/concepts/tools"
+      ],
+      "related": [
+        "LLM",
+        "Planner",
+        "Sandbox",
+        "Model Context",
+        "Skill",
+        "LangGraph"
+      ]
+    },
+    {
+      "name": "LangGraph",
+      "category": "term",
+      "description": "LangGraph 用图结构编排 Agent、LLM、Tool 和 State，适合复杂多步流程。",
+      "weight": 16,
+      "sources": [
+        "study/ai-tools/agent-engineering.md",
+        "study/ai-tools/agent-stack-playbook.md",
+        "study/ai-tools/langgraph-notes.md",
+        "study/ai-tools/mcp-notes.md",
+        "study/ai-tools/projects.md",
+        "study/ai-tools/README.md",
+        "study/ai-tools/skills-notes.md",
+        "study/ai-tools/templates/agent-project-structure.md",
+        "study/ai-tools/tradingagents-notes.md",
+        "https://langchain-ai.github.io/langgraph/"
+      ],
+      "related": [
+        "LLM",
+        "Planner",
+        "Sandbox",
+        "Model Context",
+        "MCP",
+        "Skill"
+      ]
+    },
+    {
+      "name": "Skill",
+      "category": "term",
+      "description": "Skill 是可复用工作方法包，用来沉淀流程、模板、脚本和检查清单。",
+      "weight": 16,
+      "sources": [
+        "study/ai-tools/agent-engineering.md",
+        "study/ai-tools/agent-stack-playbook.md",
+        "study/ai-tools/langgraph-notes.md",
+        "study/ai-tools/mcp-notes.md",
+        "study/ai-tools/projects.md",
+        "study/ai-tools/README.md",
+        "study/ai-tools/skills-notes.md",
+        "study/ai-tools/templates/agent-project-structure.md",
+        "study/ai-tools/tradingagents-notes.md",
+        "https://platform.openai.com/docs"
+      ],
+      "related": [
+        "LLM",
+        "Planner",
+        "Sandbox",
+        "Model Context",
+        "MCP",
+        "LangGraph"
+      ]
+    },
+    {
+      "name": "技术更新",
+      "category": "trend",
+      "description": "看到一条新闻或技术更新时，不只问“它火不火”，而是问：它会改变谁的工作、谁的收入、谁的成本、谁的机会。",
+      "weight": 16,
+      "sources": [
+        "study/news-trends/career-economy-framework.md",
+        "study/news-trends/classification.md",
+        "study/news-trends/daily/2026-06-23.md",
+        "study/news-trends/daily/2026-06-24.md",
+        "study/news-trends/daily/2026-06-26.md",
+        "study/news-trends/daily/2026-06-28.md",
+        "study/news-trends/daily/2026-06-29.md",
+        "study/news-trends/daily/2026-06-30.md",
+        "study/news-trends/daily/2026-07-01.md",
+        "study/news-trends/daily/2026-07-02.md",
+        "study/news-trends/README.md",
+        "study/README.md"
+      ],
+      "related": [
+        "LLM",
+        "观察",
+        "Tools",
+        "论文",
+        "Benchmark",
+        "立即试用"
+      ]
+    },
+    {
+      "name": "AI 圈新闻",
+      "category": "trend",
+      "description": "| AI 圈新闻 | 公司、产品、融资、模型发布、争议 | 发布会、榜单、融资、裁员、收购 | 这是行业叙事变化，还是实际能力变化？ |",
+      "weight": 15,
+      "sources": [
+        "study/news-trends/classification.md",
+        "study/news-trends/daily/2026-06-23.md",
+        "study/news-trends/daily/2026-06-24.md",
+        "study/news-trends/daily/2026-06-26.md",
+        "study/news-trends/daily/2026-06-28.md",
+        "study/news-trends/daily/2026-06-29.md",
+        "study/news-trends/daily/2026-06-30.md",
+        "study/news-trends/daily/2026-07-01.md",
+        "study/news-trends/daily/2026-07-02.md",
+        "study/news-trends/README.md",
+        "study/README.md"
+      ],
+      "related": [
+        "LLM",
+        "观察",
+        "Tools",
+        "论文",
+        "Benchmark",
+        "技术更新"
+      ]
+    },
+    {
+      "name": "社会热点",
+      "category": "trend",
+      "description": "| 社会热点 | 政策、教育、就业、人口、公共事件 | 政策文件、舆论变化、生活成本、社会情绪 | 它反映了什么长期社会压力？ |",
+      "weight": 15,
+      "sources": [
+        "study/news-trends/classification.md",
+        "study/news-trends/daily/2026-06-23.md",
+        "study/news-trends/daily/2026-06-24.md",
+        "study/news-trends/daily/2026-06-26.md",
+        "study/news-trends/daily/2026-06-28.md",
+        "study/news-trends/daily/2026-06-29.md",
+        "study/news-trends/daily/2026-06-30.md",
+        "study/news-trends/daily/2026-07-01.md",
+        "study/news-trends/daily/2026-07-02.md",
+        "study/news-trends/README.md",
+        "study/README.md"
+      ],
+      "related": [
+        "LLM",
+        "观察",
+        "Tools",
+        "论文",
+        "Benchmark",
+        "技术更新"
+      ]
+    },
+    {
+      "name": "经济热点",
+      "category": "trend",
+      "description": "| 经济热点 | 利率、通胀、汇率、地产、消费、就业、财政 | 数据发布、央行政策、市场波动、企业盈利 | 它影响收入、资产、就业还是创业机会？ |",
+      "weight": 15,
+      "sources": [
+        "study/news-trends/classification.md",
+        "study/news-trends/daily/2026-06-23.md",
+        "study/news-trends/daily/2026-06-24.md",
+        "study/news-trends/daily/2026-06-26.md",
+        "study/news-trends/daily/2026-06-28.md",
+        "study/news-trends/daily/2026-06-29.md",
+        "study/news-trends/daily/2026-06-30.md",
+        "study/news-trends/daily/2026-07-01.md",
+        "study/news-trends/daily/2026-07-02.md",
+        "study/news-trends/README.md",
+        "study/README.md"
+      ],
+      "related": [
+        "LLM",
+        "观察",
+        "Tools",
+        "论文",
+        "Benchmark",
+        "技术更新"
+      ]
+    },
+    {
+      "name": "行业热点",
+      "category": "trend",
+      "description": "| 行业热点 | 某个产业链或商业模式变化 | 订单、产能、价格、渠道、竞争格局 | 哪些公司、岗位或技能会受益或受损？ |",
+      "weight": 15,
+      "sources": [
+        "study/news-trends/classification.md",
+        "study/news-trends/daily/2026-06-23.md",
+        "study/news-trends/daily/2026-06-24.md",
+        "study/news-trends/daily/2026-06-26.md",
+        "study/news-trends/daily/2026-06-28.md",
+        "study/news-trends/daily/2026-06-29.md",
+        "study/news-trends/daily/2026-06-30.md",
+        "study/news-trends/daily/2026-07-01.md",
+        "study/news-trends/daily/2026-07-02.md",
+        "study/news-trends/README.md",
+        "study/README.md"
+      ],
+      "related": [
+        "LLM",
+        "观察",
+        "Tools",
+        "论文",
+        "Benchmark",
+        "技术更新"
+      ]
+    },
+    {
+      "name": "Codex",
+      "category": "agent",
+      "description": "Codex 是面向软件工程的 coding agent，适合读代码、改代码、跑测试和协作开发。",
+      "weight": 14,
+      "sources": [
+        "study/ai-tools/agent-engineering.md",
+        "study/ai-tools/ai-friendly-project-structure.md",
+        "study/ai-tools/glossary.md",
+        "study/ai-tools/mcp-notes.md",
+        "study/ai-tools/people-and-resources.md",
+        "study/ai-tools/projects.md",
+        "study/ai-tools/skills-notes.md",
+        "https://github.com/topics/ai-coding-assistant"
+      ],
+      "related": [
+        "LLM",
+        "Planner",
+        "Sandbox",
+        "Model Context",
+        "MCP",
+        "Skill"
+      ]
+    },
+    {
+      "name": "GitHub",
+      "category": "resource",
+      "description": "| [TradingAgents](https://github.com/TauricResearch/TradingAgents) | 用多智能体模拟金融交易公司投研流程 | La...",
+      "weight": 14,
+      "sources": [
+        "study/ai-tools/agent-engineering.md",
+        "study/ai-tools/agent-stack-playbook.md",
+        "study/ai-tools/ai-friendly-project-structure.md",
+        "study/ai-tools/langgraph-notes.md",
+        "study/ai-tools/mcp-notes.md",
+        "study/ai-tools/people-and-resources.md",
+        "study/ai-tools/platforms.md",
+        "study/ai-tools/projects.md",
+        "study/ai-tools/skills-notes.md",
+        "study/ai-tools/tradingagents-notes.md"
+      ],
+      "related": [
+        "LLM",
+        "Planner",
+        "Sandbox",
+        "Model Context",
+        "MCP",
+        "Skill"
+      ]
+    },
+    {
+      "name": "LLM",
+      "category": "term",
+      "description": "LLM 是大语言模型，擅长基于上下文生成、理解和转换自然语言与代码。",
+      "weight": 13,
+      "sources": [
+        "study/ai-tools/agent-engineering.md",
+        "study/ai-tools/langgraph-notes.md",
+        "study/ai-tools/projects.md",
+        "study/ai-tools/tradingagents-notes.md",
+        "study/news-trends/daily/2026-06-28.md",
+        "study/news-trends/daily/2026-07-01.md",
+        "https://platform.openai.com/docs"
+      ],
+      "related": [
+        "Planner",
+        "Sandbox",
+        "Model Context",
+        "MCP",
+        "Skill",
+        "LangGraph"
+      ]
+    },
+    {
+      "name": "TradingAgents",
+      "category": "project",
+      "description": "TradingAgents 是用多智能体模拟金融投研流程的 LangGraph 案例。",
+      "weight": 13,
+      "sources": [
+        "study/ai-tools/agent-engineering.md",
+        "study/ai-tools/agent-stack-playbook.md",
+        "study/ai-tools/langgraph-notes.md",
+        "study/ai-tools/projects.md",
+        "study/ai-tools/README.md",
+        "study/ai-tools/tradingagents-notes.md"
+      ],
+      "related": [
+        "LLM",
+        "Planner",
+        "Sandbox",
+        "Model Context",
+        "MCP",
+        "Skill"
+      ]
+    },
+    {
+      "name": "Claude Code",
+      "category": "agent",
+      "description": "Claude Code 是 Anthropic 的 agentic coding 工具，也可通过 Agent SDK 构建自定义 agent。",
+      "weight": 12,
+      "sources": [
+        "study/ai-tools/agent-engineering.md",
+        "study/ai-tools/ai-friendly-project-structure.md",
+        "study/ai-tools/glossary.md",
+        "study/ai-tools/people-and-resources.md",
+        "study/ai-tools/projects.md",
+        "https://docs.anthropic.com/en/docs/claude-code/overview"
+      ],
+      "related": [
+        "LLM",
+        "Planner",
+        "Sandbox",
+        "Model Context",
+        "MCP",
+        "Skill"
+      ]
+    },
+    {
+      "name": "Cursor",
+      "category": "agent",
+      "description": "Cursor 是 AI-first 代码编辑器，围绕代码库问答、自动编辑和 agent 模式提升开发效率。",
+      "weight": 10,
+      "sources": [
+        "study/ai-tools/agent-engineering.md",
+        "study/ai-tools/ai-friendly-project-structure.md",
+        "study/ai-tools/glossary.md",
+        "study/ai-tools/mcp-notes.md",
+        "study/ai-tools/people-and-resources.md",
+        "study/ai-tools/projects.md",
+        "https://cursor.com/"
+      ],
+      "related": [
+        "LLM",
+        "Planner",
+        "Sandbox",
+        "Model Context",
+        "MCP",
+        "Skill"
+      ]
+    },
+    {
+      "name": "Memory",
+      "category": "term",
+      "description": "Memory 保存长期偏好、历史事实、任务状态或外部知识，帮助 Agent 复用上下文。",
+      "weight": 10,
+      "sources": [
+        "study/ai-tools/agent-engineering.md",
+        "study/ai-tools/glossary.md",
+        "study/ai-tools/README.md",
+        "study/ai-tools/skills-notes.md",
+        "study/ai-tools/templates/agent-project-structure.md",
+        "study/ai-tools/tradingagents-notes.md",
+        "https://platform.openai.com/docs"
+      ],
+      "related": [
+        "LLM",
+        "Planner",
+        "Sandbox",
+        "Model Context",
+        "MCP",
+        "Skill"
+      ]
+    },
+    {
+      "name": "Token",
+      "category": "term",
+      "description": "Token 是模型处理文本的基本单位，成本、上下文长度和生成长度通常都按 token 计算。",
+      "weight": 9,
+      "sources": [
+        "study/ai-tools/glossary.md",
+        "study/ai-tools/langgraph-notes.md",
+        "study/ai-tools/projects.md",
+        "study/ai-tools/templates/agent-project-structure.md",
+        "study/ai-tools/tradingagents-notes.md",
+        "https://platform.openai.com/docs"
+      ],
+      "related": [
+        "LLM",
+        "Planner",
+        "Sandbox",
+        "Model Context",
+        "MCP",
+        "Skill"
+      ]
+    },
+    {
+      "name": "Tool",
+      "category": "term",
+      "description": "Tool 是 Agent 可调用的原子动作，例如查数据、写文件、调 API 或执行命令。",
+      "weight": 9,
+      "sources": [
+        "study/ai-tools/agent-engineering.md",
+        "study/ai-tools/mcp-notes.md",
+        "study/ai-tools/README.md",
+        "study/ai-tools/templates/agent-project-structure.md",
+        "study/ai-tools/tradingagents-notes.md",
+        "https://platform.openai.com/docs"
+      ],
+      "related": [
+        "LLM",
+        "Planner",
+        "Sandbox",
+        "Model Context",
+        "MCP",
+        "Skill"
+      ]
+    },
+    {
+      "name": "Tools",
+      "category": "term",
+      "description": "Tools 是 MCP 或 Agent 系统暴露给模型调用的外部动作集合。",
+      "weight": 9,
+      "sources": [
+        "study/ai-tools/glossary.md",
+        "study/ai-tools/mcp-notes.md",
+        "study/ai-tools/templates/agent-project-structure.md",
+        "study/news-trends/daily/2026-07-02.md",
+        "study/README.md",
+        "https://modelcontextprotocol.io/docs/concepts/tools"
+      ],
+      "related": [
+        "Planner",
+        "Sandbox",
+        "Model Context",
+        "MCP",
+        "Skill",
+        "LangGraph"
+      ]
+    },
+    {
+      "name": "Workflow",
+      "category": "term",
+      "description": "Workflow 是预先设计好的步骤、分支和验收流程，决定任务按什么顺序发生。",
+      "weight": 9,
+      "sources": [
+        "study/ai-tools/agent-engineering.md",
+        "study/ai-tools/glossary.md",
+        "study/ai-tools/langgraph-notes.md",
+        "study/ai-tools/templates/agent-project-structure.md",
+        "study/ai-tools/tradingagents-notes.md",
+        "https://platform.openai.com/docs"
+      ],
+      "related": [
+        "LLM",
+        "Planner",
+        "Sandbox",
+        "Model Context",
+        "MCP",
+        "Skill"
+      ]
+    },
+    {
+      "name": "论文",
+      "category": "resource",
+      "description": "AI 工具语境中的内部指标或产品缩写：如果出现在某个产品、论文或团队文档里，可能是特定名词，需要查来源。",
+      "weight": 9,
+      "sources": [
+        "study/ai-tools/glossary.md",
+        "study/ai-tools/projects.md",
+        "study/ai-tools/tradingagents-notes.md",
+        "study/news-trends/career-economy-framework.md",
+        "study/news-trends/classification.md"
+      ],
+      "related": [
+        "LLM",
+        "MCP",
+        "Skill",
+        "LangGraph",
+        "Workflow",
+        "Checkpoint"
+      ]
+    },
+    {
+      "name": "Embeddings",
+      "category": "term",
+      "description": "Embeddings 是把文本、图片等内容映射成向量表示，用于搜索、聚类、推荐和 RAG。",
+      "weight": 8,
+      "sources": [
+        "https://platform.openai.com/docs/guides/embeddings"
+      ],
+      "related": []
+    },
+    {
+      "name": "Function Calling",
+      "category": "term",
+      "description": "Function Calling 是让模型按函数参数结构调用外部代码或 API 的工具调用方式。",
+      "weight": 8,
+      "sources": [
+        "https://platform.openai.com/docs/guides/function-calling"
+      ],
+      "related": [
+        "Tool Calling"
+      ]
+    },
+    {
+      "name": "Planner",
+      "category": "term",
+      "description": "Planner 是负责拆解目标、安排步骤和选择工具的规划模块或角色。",
+      "weight": 8,
+      "sources": [
+        "study/ai-tools/agent-engineering.md",
+        "study/ai-tools/agent-stack-playbook.md",
+        "study/ai-tools/langgraph-notes.md",
+        "study/ai-tools/templates/agent-project-structure.md",
+        "https://platform.openai.com/docs"
+      ],
+      "related": [
+        "LLM",
+        "Sandbox",
+        "Model Context",
+        "MCP",
+        "Skill",
+        "LangGraph"
+      ]
+    },
+    {
+      "name": "RAG",
+      "category": "term",
+      "description": "RAG 是检索增强生成，先从外部知识库检索相关内容，再交给模型回答。",
+      "weight": 8,
+      "sources": [
+        "study/ai-tools/skills-notes.md",
+        "https://platform.openai.com/docs"
+      ],
+      "related": [
+        "LLM",
+        "Planner",
+        "Sandbox",
+        "Model Context",
+        "MCP",
+        "Skill"
+      ]
+    },
+    {
+      "name": "Sandbox",
+      "category": "term",
+      "description": "Sandbox 是隔离执行环境，用来限制代码、工具或 agent 的权限和影响范围。",
+      "weight": 8,
+      "sources": [
+        "study/ai-tools/agent-engineering.md",
+        "study/ai-tools/agent-stack-playbook.md",
+        "study/ai-tools/ai-friendly-project-structure.md",
+        "study/ai-tools/templates/agent-project-structure.md",
+        "https://platform.openai.com/docs"
+      ],
+      "related": [
+        "LLM",
+        "Planner",
+        "Model Context",
+        "MCP",
+        "Skill",
+        "LangGraph"
+      ]
+    },
+    {
+      "name": "Structured Outputs",
+      "category": "term",
+      "description": "Structured Outputs 让模型按指定 JSON Schema 生成结构化结果，减少解析和校验成本。",
+      "weight": 8,
+      "sources": [
+        "https://platform.openai.com/docs/guides/structured-outputs"
+      ],
+      "related": []
+    },
+    {
+      "name": "Benchmark",
+      "category": "term",
+      "description": "Benchmark 是用于比较模型、工具或流程能力的标准测试。",
+      "weight": 7,
+      "sources": [
+        "study/ai-tools/tradingagents-notes.md",
+        "study/news-trends/classification.md",
+        "study/news-trends/daily/2026-06-29.md",
+        "study/news-trends/daily/2026-06-30.md",
+        "study/news-trends/daily/2026-07-02.md",
+        "https://platform.openai.com/docs"
+      ],
+      "related": [
+        "LLM",
+        "Planner",
+        "Sandbox",
+        "Model Context",
+        "MCP",
+        "Skill"
+      ]
+    },
+    {
+      "name": "Context",
+      "category": "term",
+      "description": "长期记忆、SOUL/personality、context files、MCP、tool gateway、messaging gateway 如何分工。",
+      "weight": 7,
+      "sources": [
+        "study/ai-tools/agent-engineering.md",
+        "study/ai-tools/glossary.md",
+        "study/ai-tools/mcp-notes.md",
+        "https://platform.openai.com/docs"
+      ],
+      "related": [
+        "LLM",
+        "Planner",
+        "Sandbox",
+        "Model Context",
+        "MCP",
+        "Skill"
+      ]
+    },
+    {
+      "name": "Eval",
+      "category": "term",
+      "description": "Eval 用于验证 Agent 输出和流程结果，是质量控制层。",
+      "weight": 7,
+      "sources": [
+        "study/ai-tools/agent-engineering.md",
+        "study/ai-tools/agent-stack-playbook.md",
+        "study/ai-tools/templates/agent-project-structure.md",
+        "https://platform.openai.com/docs"
+      ],
+      "related": [
+        "LLM",
+        "Planner",
+        "Sandbox",
+        "Model Context",
+        "MCP",
+        "Skill"
+      ]
+    },
+    {
+      "name": "Node",
+      "category": "term",
+      "description": "Node 是图式工作流中的处理节点，通常负责一次模型调用、工具调用或状态更新。",
+      "weight": 7,
+      "sources": [
+        "study/ai-tools/langgraph-notes.md",
+        "study/ai-tools/mcp-notes.md",
+        "study/ai-tools/templates/agent-project-structure.md",
+        "https://platform.openai.com/docs"
+      ],
+      "related": [
+        "LLM",
+        "Planner",
+        "Sandbox",
+        "Model Context",
+        "MCP",
+        "Skill"
+      ]
+    },
+    {
+      "name": "AiToEarn",
+      "category": "agent",
+      "description": "| [AiToEarn](https://aitoearn.ai/zh-CN?role=creator) | AI 内容创作与任务变现平台 | 创作者任务市场、AI 内容生产、多平台...",
+      "weight": 6,
+      "sources": [
+        "study/ai-tools/platforms.md",
+        "study/ai-tools/projects.md",
+        "https://github.com/topics/ai-coding-assistant"
+      ],
+      "related": [
+        "LLM",
+        "MCP",
+        "Skill",
+        "LangGraph",
+        "Checkpoint",
+        "Codex"
+      ]
+    },
+    {
+      "name": "Checkpoint",
+      "category": "term",
+      "description": "Checkpoint 是长流程中的状态保存点，用于恢复、调试和继续执行。",
+      "weight": 6,
+      "sources": [
+        "study/ai-tools/agent-engineering.md",
+        "study/ai-tools/langgraph-notes.md",
+        "study/ai-tools/projects.md",
+        "study/ai-tools/tradingagents-notes.md",
+        "https://platform.openai.com/docs"
+      ],
+      "related": [
+        "LLM",
+        "Planner",
+        "Sandbox",
+        "Model Context",
+        "MCP",
+        "Skill"
+      ]
+    },
+    {
+      "name": "Edge",
+      "category": "term",
+      "description": "Edge 是图式工作流中节点之间的流转关系，决定下一步进入哪个节点。",
+      "weight": 6,
+      "sources": [
+        "study/ai-tools/langgraph-notes.md",
+        "study/ai-tools/templates/agent-project-structure.md",
+        "https://platform.openai.com/docs"
+      ],
+      "related": [
+        "LLM",
+        "Planner",
+        "Sandbox",
+        "Model Context",
+        "MCP",
+        "Skill"
+      ]
+    },
+    {
+      "name": "OpenClaw",
+      "category": "agent",
+      "description": "OpenClaw 更接近个人自动化助手，侧重消息渠道、网页、设备和个人任务执行。",
+      "weight": 6,
+      "sources": [
+        "study/ai-tools/agent-engineering.md",
+        "study/ai-tools/projects.md",
+        "https://github.com/topics/ai-coding-assistant"
+      ],
+      "related": [
+        "LLM",
+        "Planner",
+        "Sandbox",
+        "Model Context",
+        "MCP",
+        "Skill"
+      ]
+    },
+    {
+      "name": "Prompts",
+      "category": "term",
+      "description": "Prompts 是可复用提示模板，用来标准化某类任务的输入方式。",
+      "weight": 6,
+      "sources": [
+        "study/ai-tools/mcp-notes.md",
+        "study/ai-tools/templates/agent-project-structure.md",
+        "https://modelcontextprotocol.io/docs/concepts/prompts"
+      ],
+      "related": [
+        "Planner",
+        "Sandbox",
+        "Model Context",
+        "MCP",
+        "Skill",
+        "LangGraph"
+      ]
+    },
+    {
+      "name": "Windsurf",
+      "category": "agent",
+      "description": "Windsurf 是 Codeium 推出的 agentic IDE，强调多文件上下文和自动化代码修改流程。",
+      "weight": 6,
+      "sources": [
+        "study/ai-tools/ai-friendly-project-structure.md",
+        "study/ai-tools/people-and-resources.md",
+        "https://windsurf.com/"
+      ],
+      "related": [
+        "Sandbox",
+        "MCP",
+        "Codex",
+        "Claude Code",
+        "Cursor",
+        "GitHub"
+      ]
+    },
+    {
+      "name": "官方文档",
+      "category": "resource",
+      "description": "官方文档：[docs.aitoearn.ai](https://docs.aitoearn.ai/en/help-center/getting-started/4-what-is-a...",
+      "weight": 6,
+      "sources": [
+        "study/ai-tools/platforms.md",
+        "study/ai-tools/projects.md"
+      ],
+      "related": [
+        "LLM",
+        "MCP",
+        "Skill",
+        "LangGraph",
+        "Checkpoint",
+        "Codex"
+      ]
+    },
+    {
+      "name": "暂不跟进",
+      "category": "action",
+      "description": "暂不跟进：热度高但与个人方向关系弱。",
+      "weight": 6,
+      "sources": [
+        "study/news-trends/career-economy-framework.md",
+        "study/README.md"
+      ],
+      "related": [
+        "观察",
+        "Tools",
+        "论文",
+        "技术更新",
+        "立即试用",
+        "深入学习"
+      ]
+    },
+    {
+      "name": "深入学习",
+      "category": "action",
+      "description": "深入学习：它影响未来岗位要求，需要系统补课。",
+      "weight": 6,
+      "sources": [
+        "study/news-trends/career-economy-framework.md",
+        "study/README.md"
+      ],
+      "related": [
+        "观察",
+        "Tools",
+        "论文",
+        "技术更新",
+        "立即试用",
+        "记录案例"
+      ]
+    },
+    {
+      "name": "立即试用",
+      "category": "action",
+      "description": "立即试用：工具或技术已经可用，值得上手。",
+      "weight": 6,
+      "sources": [
+        "study/news-trends/career-economy-framework.md",
+        "study/README.md"
+      ],
+      "related": [
+        "观察",
+        "Tools",
+        "论文",
+        "技术更新",
+        "深入学习",
+        "记录案例"
+      ]
+    },
+    {
+      "name": "记录案例",
+      "category": "action",
+      "description": "| 短期，1 到 3 个月 | 热点、情绪、产品试用、信息差 | 观察、试用、记录案例 |",
+      "weight": 6,
+      "sources": [
+        "study/news-trends/career-economy-framework.md",
+        "study/README.md"
+      ],
+      "related": [
+        "观察",
+        "Tools",
+        "论文",
+        "技术更新",
+        "立即试用",
+        "深入学习"
+      ]
+    },
+    {
+      "name": "Aider",
+      "category": "agent",
+      "description": "Aider 是终端里的 AI pair programming 工具，直接基于 git 仓库读写代码。",
+      "weight": 5,
+      "sources": [
+        "study/ai-tools/people-and-resources.md",
+        "https://aider.chat/"
+      ],
+      "related": [
+        "MCP",
+        "Codex",
+        "Claude Code",
+        "Cursor",
+        "GitHub",
+        "观察"
+      ]
+    },
+    {
+      "name": "Base44",
+      "category": "agent",
+      "description": "Base44 是从自然语言生成业务应用的 AI app builder，面向快速搭建内部工具和产品原型。",
+      "weight": 5,
+      "sources": [
+        "https://base44.com/"
+      ],
+      "related": []
+    },
+    {
+      "name": "Bolt.new",
+      "category": "agent",
+      "description": "Bolt.new 是 StackBlitz 的浏览器内 AI 应用构建工具，适合快速生成和运行 Web 应用。",
+      "weight": 5,
+      "sources": [
+        "https://bolt.new/"
+      ],
+      "related": []
+    },
+    {
+      "name": "Cline",
+      "category": "agent",
+      "description": "Cline 是 VS Code 内的开源 coding agent，可读写文件、运行命令并协助完成开发任务。",
+      "weight": 5,
+      "sources": [
+        "https://cline.bot/"
+      ],
+      "related": []
+    },
+    {
+      "name": "Continue",
+      "category": "agent",
+      "description": "Continue 是开源 AI 代码助手，可在 IDE 中连接不同模型、上下文和自定义开发工作流。",
+      "weight": 5,
+      "sources": [
+        "https://www.continue.dev/"
+      ],
+      "related": []
+    },
+    {
+      "name": "Devin",
+      "category": "agent",
+      "description": "Devin 是 Cognition 推出的 AI 软件工程 agent，定位为可规划、编码、调试和交付任务的工程助手。",
+      "weight": 5,
+      "sources": [
+        "https://devin.ai/"
+      ],
+      "related": []
+    },
+    {
+      "name": "Evals",
+      "category": "term",
+      "description": "Evals 是可重复运行的评估集或评测流程，用来发现回归和比较模型表现。",
+      "weight": 5,
+      "sources": [
+        "study/ai-tools/templates/agent-project-structure.md",
+        "https://platform.openai.com/docs"
+      ],
+      "related": [
+        "LLM",
+        "Planner",
+        "Sandbox",
+        "Model Context",
+        "MCP",
+        "Skill"
+      ]
+    },
+    {
+      "name": "Handoff",
+      "category": "term",
+      "description": "Handoff 是 agent 或流程之间转交任务、上下文和控制权的机制。",
+      "weight": 5,
+      "sources": [
+        "https://openai.github.io/openai-agents-python/handoffs/"
+      ],
+      "related": []
+    },
+    {
+      "name": "Jules",
+      "category": "agent",
+      "description": "Jules 是 Google 的异步 coding agent，可接收开发任务并在代码库中规划和修改代码。",
+      "weight": 5,
+      "sources": [
+        "https://jules.google/"
+      ],
+      "related": []
+    },
+    {
+      "name": "Kiro",
+      "category": "agent",
+      "description": "Kiro 是 AWS 推出的 agentic IDE，强调从规格、设计到代码实现的规范化开发流程。",
+      "weight": 5,
+      "sources": [
+        "https://kiro.dev/"
+      ],
+      "related": []
+    },
+    {
+      "name": "Latency",
+      "category": "term",
+      "description": "Latency 是从请求发出到拿到响应的延迟，是产品体验和成本的重要指标。",
+      "weight": 5,
+      "sources": [
+        "https://platform.openai.com/docs"
+      ],
+      "related": [
+        "LLM",
+        "Planner",
+        "Sandbox",
+        "Model Context",
+        "Skill",
+        "Workflow"
+      ]
+    },
+    {
+      "name": "Lovable",
+      "category": "agent",
+      "description": "Lovable 是面向产品原型和 Web 应用生成的 AI app builder，可从自然语言生成前端和后端。",
+      "weight": 5,
+      "sources": [
+        "https://lovable.dev/"
+      ],
+      "related": []
+    },
+    {
+      "name": "Qodo",
+      "category": "agent",
+      "description": "Qodo 是面向代码质量、测试生成和代码审查的 AI 开发工具。",
+      "weight": 5,
+      "sources": [
+        "https://www.qodo.ai/"
+      ],
+      "related": []
+    },
+    {
+      "name": "QuantDinger",
+      "category": "project",
+      "description": "`agency-agents` 的角色定义、`QuantDinger` 的 paper-only token 和 audit log，都可以从 harness engineering...",
+      "weight": 5,
+      "sources": [
+        "study/ai-tools/glossary.md",
+        "study/ai-tools/projects.md",
+        "study/ai-tools/tradingagents-notes.md"
+      ],
+      "related": [
+        "LLM",
+        "MCP",
+        "Skill",
+        "LangGraph",
+        "Workflow",
+        "Checkpoint"
+      ]
+    },
+    {
+      "name": "ReAct",
+      "category": "term",
+      "description": "ReAct 是把推理和行动交替组织起来的 agent 提示/流程模式。",
+      "weight": 5,
+      "sources": [
+        "https://platform.openai.com/docs"
+      ],
+      "related": [
+        "LLM",
+        "Planner",
+        "Sandbox",
+        "Model Context",
+        "Skill",
+        "Workflow"
+      ]
+    },
+    {
+      "name": "Roo Code",
+      "category": "agent",
+      "description": "Roo Code 是 VS Code 生态里的 AI coding agent，支持多模式协作和工具调用。",
+      "weight": 5,
+      "sources": [
+        "https://roocode.com/"
+      ],
+      "related": []
+    },
+    {
+      "name": "Tabnine",
+      "category": "agent",
+      "description": "Tabnine 是面向团队和企业的 AI 代码助手，强调私有化、代码补全和团队知识适配。",
+      "weight": 5,
+      "sources": [
+        "https://www.tabnine.com/"
+      ],
+      "related": []
+    },
+    {
+      "name": "Top-p",
+      "category": "term",
+      "description": "Top-p 是 nucleus sampling 参数，用概率质量截断候选 token 集合。",
+      "weight": 5,
+      "sources": [
+        "https://platform.openai.com/docs"
+      ],
+      "related": [
+        "LLM",
+        "Planner",
+        "Sandbox",
+        "Model Context",
+        "Skill",
+        "Workflow"
+      ]
+    },
+    {
+      "name": "Tracing",
+      "category": "term",
+      "description": "Tracing 记录 agent 运行过程、工具调用和中间状态，方便调试与评估。",
+      "weight": 5,
+      "sources": [
+        "https://openai.github.io/openai-agents-python/tracing/"
+      ],
+      "related": []
+    },
+    {
+      "name": "Trae",
+      "category": "agent",
+      "description": "Trae 是面向软件开发的 AI IDE / coding agent 产品，强调从需求到代码的协作开发体验。",
+      "weight": 5,
+      "sources": [
+        "https://www.trae.ai/"
+      ],
+      "related": []
+    },
+    {
+      "name": "v0",
+      "category": "agent",
+      "description": "v0 是 Vercel 的 AI UI / Web 生成工具，适合从提示词生成界面和应用片段。",
+      "weight": 5,
+      "sources": [
+        "https://v0.dev/"
+      ],
+      "related": []
+    },
+    {
+      "name": "a-stock-data",
+      "category": "project",
+      "description": "a-stock-data 是 A 股数据工具包，可作为金融 agent 的数据能力来源。",
+      "weight": 4,
+      "sources": [
+        "study/ai-tools/projects.md",
+        "study/ai-tools/tradingagents-notes.md"
+      ],
+      "related": [
+        "LLM",
+        "MCP",
+        "Skill",
+        "LangGraph",
+        "Workflow",
+        "Checkpoint"
+      ]
+    },
+    {
+      "name": "Agent 项目结构模板",
+      "category": "project",
+      "description": "[Agent 项目结构模板](templates/agent-project-structure.md)",
+      "weight": 4,
+      "sources": [
+        "study/ai-tools/README.md",
+        "study/ai-tools/templates/agent-project-structure.md"
+      ],
+      "related": [
+        "Planner",
+        "Sandbox",
+        "MCP",
+        "Skill",
+        "LangGraph",
+        "Workflow"
+      ]
+    },
+    {
+      "name": "AI-Trader",
+      "category": "project",
+      "description": "| [AI-Trader](https://github.com/HKUDS/AI-Trader) | Agent-native AI 交易平台 | AI agent 接入交易、信号...",
+      "weight": 4,
+      "sources": [
+        "study/ai-tools/projects.md",
+        "study/ai-tools/tradingagents-notes.md"
+      ],
+      "related": [
+        "LLM",
+        "MCP",
+        "Skill",
+        "LangGraph",
+        "Workflow",
+        "Checkpoint"
+      ]
+    },
+    {
+      "name": "Gemini CLI",
+      "category": "agent",
+      "description": "Gemini CLI 是 Google 推出的开源终端 AI agent，把 Gemini 能力带到命令行开发流程。",
+      "weight": 4,
+      "sources": [
+        "study/ai-tools/glossary.md",
+        "study/ai-tools/people-and-resources.md",
+        "https://github.com/google-gemini/gemini-cli"
+      ],
+      "related": [
+        "MCP",
+        "Workflow",
+        "Memory",
+        "Context",
+        "Codex",
+        "Claude Code"
+      ]
+    },
+    {
+      "name": "GitHub Copilot",
+      "category": "agent",
+      "description": "GitHub Copilot 是 GitHub 的 AI 编程助手，覆盖代码补全、聊天、代码审查和 agent mode。",
+      "weight": 4,
+      "sources": [
+        "study/ai-tools/ai-friendly-project-structure.md",
+        "study/ai-tools/people-and-resources.md",
+        "https://docs.github.com/en/copilot"
+      ],
+      "related": [
+        "Sandbox",
+        "MCP",
+        "Codex",
+        "Claude Code",
+        "Cursor",
+        "GitHub"
+      ]
+    },
+    {
+      "name": "Hermes Agent",
+      "category": "agent",
+      "description": "Hermes Agent 是围绕长期记忆、工具网关和 Skill 自改进设计的 agent runtime。",
+      "weight": 4,
+      "sources": [
+        "study/ai-tools/agent-engineering.md",
+        "study/ai-tools/skills-notes.md",
+        "https://github.com/topics/ai-coding-assistant"
+      ],
+      "related": [
+        "LLM",
+        "Planner",
+        "Sandbox",
+        "Model Context",
+        "MCP",
+        "Skill"
+      ]
+    },
+    {
+      "name": "Inference",
+      "category": "term",
+      "description": "Inference 是模型根据输入生成输出的运行过程。",
+      "weight": 4,
+      "sources": [
+        "study/news-trends/daily/2026-06-28.md",
+        "study/news-trends/daily/2026-07-01.md",
+        "https://platform.openai.com/docs"
+      ],
+      "related": [
+        "LLM",
+        "Planner",
+        "Sandbox",
+        "Model Context",
+        "Skill",
+        "Workflow"
+      ]
+    },
+    {
+      "name": "Model Context",
+      "category": "term",
+      "description": "Model Context 是提供给模型的任务指令、历史、工具结果和外部知识集合。",
+      "weight": 4,
+      "sources": [
+        "study/ai-tools/agent-engineering.md",
+        "study/ai-tools/mcp-notes.md",
+        "https://platform.openai.com/docs"
+      ],
+      "related": [
+        "LLM",
+        "Planner",
+        "Sandbox",
+        "MCP",
+        "Skill",
+        "LangGraph"
+      ]
+    },
+    {
+      "name": "Resources",
+      "category": "term",
+      "description": "Resources 是 MCP 暴露给 AI 客户端读取的外部数据、文件或上下文资源。",
+      "weight": 4,
+      "sources": [
+        "study/ai-tools/mcp-notes.md",
+        "study/ai-tools/templates/agent-project-structure.md",
+        "https://modelcontextprotocol.io/docs/concepts/resources"
+      ],
+      "related": [
+        "Planner",
+        "Sandbox",
+        "Model Context",
+        "MCP",
+        "Skill",
+        "LangGraph"
+      ]
+    },
+    {
+      "name": "TradingAgents-CN",
+      "category": "project",
+      "description": "TradingAgents-CN 是 TradingAgents 的中文生态版本，适合观察本地化投研 agent 实践。",
+      "weight": 4,
+      "sources": [
+        "study/ai-tools/projects.md",
+        "study/ai-tools/tradingagents-notes.md"
+      ],
+      "related": [
+        "LLM",
+        "MCP",
+        "Skill",
+        "LangGraph",
+        "Workflow",
+        "Checkpoint"
+      ]
+    },
+    {
+      "name": "AI Model Hub",
+      "category": "agent",
+      "description": "| [AI Model Hub / muyun.lk888.ai](https://muyun.lk888.ai/zh-CN) | AI 模型聚合平台，模型超市/API 中转入口 |...",
+      "weight": 3,
+      "sources": [
+        "study/ai-tools/platforms.md",
+        "https://github.com/topics/ai-coding-assistant"
+      ],
+      "related": [
+        "Codex",
+        "OpenClaw",
+        "Hermes Agent",
+        "GitHub",
+        "观察",
+        "AiToEarn"
+      ]
+    },
+    {
+      "name": "AI 基础设施：美光与 Anthropic 合作",
+      "category": "trend",
+      "description": "AI 基础设施：美光与 Anthropic 合作 属于新闻趋势，来自 study 学习笔记。",
+      "weight": 3,
+      "sources": [
+        "study/news-trends/daily/2026-06-23.md"
+      ],
+      "related": [
+        "观察",
+        "技术更新",
+        "AI 圈新闻",
+        "社会热点",
+        "行业热点",
+        "经济热点"
+      ]
+    },
+    {
+      "name": "AI 工具开源项目案例",
+      "category": "project",
+      "description": "AI 工具开源项目案例 属于项目 / 案例 / 模板，来自 study 学习笔记。",
+      "weight": 3,
+      "sources": [
+        "study/ai-tools/projects.md"
+      ],
+      "related": [
+        "LLM",
+        "MCP",
+        "Skill",
+        "LangGraph",
+        "Checkpoint",
+        "Codex"
+      ]
+    },
+    {
+      "name": "AI 权重股回落，市场开始重新定价资本开支",
+      "category": "trend",
+      "description": "AI 权重股回落，市场开始重新定价资本开支 属于新闻趋势，来自 study 学习笔记。",
+      "weight": 3,
+      "sources": [
+        "study/news-trends/daily/2026-06-24.md"
+      ],
+      "related": [
+        "观察",
+        "技术更新",
+        "AI 圈新闻",
+        "社会热点",
+        "行业热点",
+        "经济热点"
+      ]
+    },
+    {
+      "name": "AI 网络安全：五眼联盟风险警告",
+      "category": "trend",
+      "description": "AI 网络安全：五眼联盟风险警告 属于新闻趋势，来自 study 学习笔记。",
+      "weight": 3,
+      "sources": [
+        "study/news-trends/daily/2026-06-23.md"
+      ],
+      "related": [
+        "观察",
+        "技术更新",
+        "AI 圈新闻",
+        "社会热点",
+        "行业热点",
+        "经济热点"
+      ]
+    },
+    {
+      "name": "Amazon Q Developer",
+      "category": "agent",
+      "description": "Amazon Q Developer 是 AWS 的 AI 编程助手，面向云开发、代码生成、迁移和运维排查。",
+      "weight": 3,
+      "sources": [
+        "https://aws.amazon.com/q/developer/"
+      ],
+      "related": []
+    },
+    {
+      "name": "Anthropic 模型进入国家级安全测试",
+      "category": "trend",
+      "description": "Anthropic 模型进入国家级安全测试 属于新闻趋势，来自 study 学习笔记。",
+      "weight": 3,
+      "sources": [
+        "study/news-trends/daily/2026-06-24.md"
+      ],
+      "related": [
+        "观察",
+        "技术更新",
+        "AI 圈新闻",
+        "社会热点",
+        "行业热点",
+        "经济热点"
+      ]
+    },
+    {
+      "name": "Batch API",
+      "category": "term",
+      "description": "Batch API 用于异步批量处理大量请求，常用于离线任务和成本优化。",
+      "weight": 3,
+      "sources": [
+        "https://platform.openai.com/docs/guides/batch"
+      ],
+      "related": []
+    },
+    {
+      "name": "Chain of Thought",
+      "category": "term",
+      "description": "Chain of Thought 是让模型显式或隐式分解推理步骤的提示方法。",
+      "weight": 3,
+      "sources": [
+        "https://platform.openai.com/docs"
+      ],
+      "related": [
+        "LLM",
+        "Planner",
+        "Sandbox",
+        "Model Context",
+        "Skill",
+        "Workflow"
+      ]
+    },
+    {
+      "name": "CodeBuddy",
+      "category": "agent",
+      "description": "CodeBuddy 是腾讯云推出的 AI 编码助手 / coding agent，面向代码生成、理解、调试和开发协作。",
+      "weight": 3,
+      "sources": [
+        "https://www.tencentcloud.com/products/codebuddy"
+      ],
+      "related": []
+    },
+    {
+      "name": "CodeRabbit",
+      "category": "agent",
+      "description": "CodeRabbit 是 AI 代码审查工具，面向 Pull Request 总结、审查和反馈。",
+      "weight": 3,
+      "sources": [
+        "https://www.coderabbit.ai/"
+      ],
+      "related": []
+    },
+    {
+      "name": "Computer Use",
+      "category": "term",
+      "description": "Computer Use 是让模型通过浏览器或桌面界面观察并操作软件的能力。",
+      "weight": 3,
+      "sources": [
+        "https://platform.openai.com/docs"
+      ],
+      "related": [
+        "LLM",
+        "Planner",
+        "Sandbox",
+        "Model Context",
+        "Skill",
+        "Workflow"
+      ]
+    },
+    {
+      "name": "Context Window",
+      "category": "term",
+      "description": "Context Window 是模型一次请求能看到的最大上下文范围。",
+      "weight": 3,
+      "sources": [
+        "https://platform.openai.com/docs"
+      ],
+      "related": [
+        "LLM",
+        "Planner",
+        "Sandbox",
+        "Model Context",
+        "Skill",
+        "Workflow"
+      ]
+    },
+    {
+      "name": "Distillation",
+      "category": "term",
+      "description": "Distillation 是把大模型能力迁移到更小模型的训练方法。",
+      "weight": 3,
+      "sources": [
+        "https://platform.openai.com/docs"
+      ],
+      "related": [
+        "LLM",
+        "Planner",
+        "Sandbox",
+        "Model Context",
+        "Skill",
+        "Workflow"
+      ]
+    },
+    {
+      "name": "Evaluation",
+      "category": "term",
+      "description": "Evaluation 是对模型或 agent 输出质量进行测试、评分和对比的过程。",
+      "weight": 3,
+      "sources": [
+        "https://platform.openai.com/docs"
+      ],
+      "related": [
+        "LLM",
+        "Planner",
+        "Sandbox",
+        "Model Context",
+        "Skill",
+        "Workflow"
+      ]
+    },
+    {
+      "name": "Fine-tuning",
+      "category": "term",
+      "description": "Fine-tuning 是在特定数据上继续训练模型，使其更适配某类任务或风格。",
+      "weight": 3,
+      "sources": [
+        "https://platform.openai.com/docs"
+      ],
+      "related": [
+        "LLM",
+        "Planner",
+        "Sandbox",
+        "Model Context",
+        "Skill",
+        "Workflow"
+      ]
+    },
+    {
+      "name": "Firebase Studio",
+      "category": "agent",
+      "description": "Firebase Studio 是 Google/Firebase 的云端 AI 应用开发环境，面向全栈应用生成和迭代。",
+      "weight": 3,
+      "sources": [
+        "https://firebase.studio/"
+      ],
+      "related": []
+    },
+    {
+      "name": "Google AI 人才与估值压力",
+      "category": "trend",
+      "description": "Google AI 人才与估值压力 属于新闻趋势，来自 study 学习笔记。",
+      "weight": 3,
+      "sources": [
+        "study/news-trends/daily/2026-06-23.md"
+      ],
+      "related": [
+        "观察",
+        "技术更新",
+        "AI 圈新闻",
+        "社会热点",
+        "行业热点",
+        "经济热点"
+      ]
+    },
+    {
+      "name": "Google 发布 2026 环境报告",
+      "category": "trend",
+      "description": "| Google 发布 2026 环境报告 | 技术更新 / 社会热点 / 行业热点 | Google 在 2026 年 7 月 1 日发布年度环境报告，披露 AI 带来的电力需求增...",
+      "weight": 3,
+      "sources": [
+        "study/news-trends/daily/2026-07-01.md"
+      ],
+      "related": [
+        "LLM",
+        "观察",
+        "技术更新",
+        "AI 圈新闻",
+        "社会热点",
+        "行业热点"
+      ]
+    },
+    {
+      "name": "Google 环境报告直接承认 AI 与电网脱碳错配",
+      "category": "trend",
+      "description": "| Google 环境报告直接承认 AI 与电网脱碳错配 | 技术更新 / 行业热点 / 经济热点 | Google 2026 年环境报告指出 AI 基建扩张速度快于电网脱碳速度，接...",
+      "weight": 3,
+      "sources": [
+        "study/news-trends/daily/2026-07-02.md"
+      ],
+      "related": [
+        "观察",
+        "Tools",
+        "Benchmark",
+        "技术更新",
+        "AI 圈新闻",
+        "社会热点"
+      ]
+    },
+    {
+      "name": "Grounding",
+      "category": "term",
+      "description": "Grounding 是让模型回答依托可验证来源、检索内容或真实环境状态。",
+      "weight": 3,
+      "sources": [
+        "https://platform.openai.com/docs"
+      ],
+      "related": [
+        "LLM",
+        "Planner",
+        "Sandbox",
+        "Model Context",
+        "Skill",
+        "Workflow"
+      ]
+    },
+    {
+      "name": "Guardrails",
+      "category": "term",
+      "description": "Guardrails 是限制输入输出、工具调用和风险行为的安全与质量边界。",
+      "weight": 3,
+      "sources": [
+        "study/ai-tools/glossary.md",
+        "https://openai.github.io/openai-agents-python/guardrails/"
+      ],
+      "related": [
+        "MCP",
+        "Workflow",
+        "Memory",
+        "Context",
+        "Codex",
+        "Claude Code"
+      ]
+    },
+    {
+      "name": "Hallucination",
+      "category": "term",
+      "description": "Hallucination 指模型生成看似合理但不真实或无依据的信息。",
+      "weight": 3,
+      "sources": [
+        "https://platform.openai.com/docs"
+      ],
+      "related": [
+        "LLM",
+        "Planner",
+        "Sandbox",
+        "Model Context",
+        "Skill",
+        "Workflow"
+      ]
+    },
+    {
+      "name": "JetBrains Junie",
+      "category": "agent",
+      "description": "JetBrains Junie 是 JetBrains IDE 内的 coding agent，用于理解项目、改代码和执行开发任务。",
+      "weight": 3,
+      "sources": [
+        "https://www.jetbrains.com/junie/"
+      ],
+      "related": []
+    },
+    {
+      "name": "JSON Schema",
+      "category": "term",
+      "description": "JSON Schema 是描述 JSON 数据结构、字段和约束的标准格式。",
+      "weight": 3,
+      "sources": [
+        "https://platform.openai.com/docs"
+      ],
+      "related": [
+        "LLM",
+        "Planner",
+        "Sandbox",
+        "Model Context",
+        "Skill",
+        "Workflow"
+      ]
+    },
+    {
+      "name": "Michael Sitarzewski",
+      "category": "resource",
+      "description": "| [Michael Sitarzewski / msitarzewski](https://github.com/msitarzewski) | 开发者 / 创业者 | AI ag...",
+      "weight": 3,
+      "sources": [
+        "study/ai-tools/people-and-resources.md"
+      ],
+      "related": [
+        "MCP",
+        "Codex",
+        "Claude Code",
+        "Cursor",
+        "GitHub",
+        "观察"
+      ]
+    },
+    {
+      "name": "Multimodal",
+      "category": "term",
+      "description": "Multimodal 指模型能处理文本、图像、音频、视频等多种模态。",
+      "weight": 3,
+      "sources": [
+        "https://platform.openai.com/docs"
+      ],
+      "related": [
+        "LLM",
+        "Planner",
+        "Sandbox",
+        "Model Context",
+        "Skill",
+        "Workflow"
+      ]
+    },
+    {
+      "name": "OpenAI 发布 GPT-5.6 Sol 预览",
+      "category": "trend",
+      "description": "| OpenAI 发布 GPT-5.6 Sol 预览 | AI 圈新闻 / 技术更新 | OpenAI 于 2026 年 6 月 27 日宣布 GPT-5.6 Sol 预览，并强调更...",
+      "weight": 3,
+      "sources": [
+        "study/news-trends/daily/2026-06-29.md"
+      ],
+      "related": [
+        "观察",
+        "Benchmark",
+        "技术更新",
+        "AI 圈新闻",
+        "社会热点",
+        "行业热点"
+      ]
+    },
+    {
+      "name": "OpenAI 发布“agents 正在改变工作”研究",
+      "category": "trend",
+      "description": "| OpenAI 发布“agents 正在改变工作”研究 | AI 圈新闻 / 社会热点 / 行业热点 | OpenAI 于 2026 年 6 月 26 日公布用户增长与职业使用数据...",
+      "weight": 3,
+      "sources": [
+        "study/news-trends/daily/2026-06-29.md"
+      ],
+      "related": [
+        "观察",
+        "Benchmark",
+        "技术更新",
+        "AI 圈新闻",
+        "社会热点",
+        "行业热点"
+      ]
+    },
+    {
+      "name": "OpenAI 强化 agent 工作叙事",
+      "category": "trend",
+      "description": "| OpenAI 强化 agent 工作叙事 | AI 圈新闻 / 技术更新 / 社会热点 | OpenAI 最新研究继续强调 agent 正在把 AI 从问答工具推向复杂任务执行。...",
+      "weight": 3,
+      "sources": [
+        "study/news-trends/daily/2026-07-01.md"
+      ],
+      "related": [
+        "LLM",
+        "观察",
+        "技术更新",
+        "AI 圈新闻",
+        "社会热点",
+        "行业热点"
+      ]
+    },
+    {
+      "name": "OpenAI 按政府协同流程小范围预览 GPT-5.6",
+      "category": "trend",
+      "description": "| OpenAI 按政府协同流程小范围预览 GPT-5.6 | AI 圈新闻 / 技术更新 / 社会热点 | OpenAI 于 2026 年 6 月 26 日宣布，GPT-5.6 先...",
+      "weight": 3,
+      "sources": [
+        "study/news-trends/daily/2026-06-28.md"
+      ],
+      "related": [
+        "LLM",
+        "观察",
+        "技术更新",
+        "AI 圈新闻",
+        "社会热点",
+        "行业热点"
+      ]
+    },
+    {
+      "name": "OpenAI 新模型传出将分阶段发布并接受政府筛查",
+      "category": "trend",
+      "description": "| OpenAI 新模型传出将分阶段发布并接受政府筛查 | AI 圈新闻 / 技术更新 / 社会热点 | FT 与 The Verge 报道称，OpenAI 的 GPT-5.6 将先...",
+      "weight": 3,
+      "sources": [
+        "study/news-trends/daily/2026-06-26.md"
+      ],
+      "related": [
+        "观察",
+        "技术更新",
+        "AI 圈新闻",
+        "社会热点",
+        "行业热点",
+        "经济热点"
+      ]
+    },
+    {
+      "name": "OpenAI 继续强化前沿模型与 agent 叙事",
+      "category": "trend",
+      "description": "| OpenAI 继续强化前沿模型与 agent 叙事 | AI 圈新闻 / 技术更新 / 社会热点 | GPT-5.6 Sol 预览和“agents 正在改变工作”研究继续定义本轮...",
+      "weight": 3,
+      "sources": [
+        "study/news-trends/daily/2026-06-30.md"
+      ],
+      "related": [
+        "观察",
+        "Benchmark",
+        "技术更新",
+        "AI 圈新闻",
+        "社会热点",
+        "行业热点"
+      ]
+    },
+    {
+      "name": "OpenAI 预览 GPT-5.6 Sol",
+      "category": "trend",
+      "description": "| OpenAI 预览 GPT-5.6 Sol | AI 圈新闻 / 技术更新 | OpenAI 在 2026 年 6 月 26 日预览新一代模型 GPT-5.6 Sol，重点强调编...",
+      "weight": 3,
+      "sources": [
+        "study/news-trends/daily/2026-07-02.md"
+      ],
+      "related": [
+        "观察",
+        "Tools",
+        "Benchmark",
+        "技术更新",
+        "AI 圈新闻",
+        "社会热点"
+      ]
+    },
+    {
+      "name": "Prompt Caching",
+      "category": "term",
+      "description": "Prompt Caching 复用重复上下文的计算结果，用于降低延迟和成本。",
+      "weight": 3,
+      "sources": [
+        "https://platform.openai.com/docs/guides/prompt-caching"
+      ],
+      "related": []
+    },
+    {
+      "name": "Prompt Engineering",
+      "category": "term",
+      "description": "Prompt Engineering 是设计指令、上下文和示例来稳定引导模型输出的方法。",
+      "weight": 3,
+      "sources": [
+        "https://platform.openai.com/docs"
+      ],
+      "related": [
+        "LLM",
+        "Planner",
+        "Sandbox",
+        "Model Context",
+        "Skill",
+        "Workflow"
+      ]
+    },
+    {
+      "name": "Replit Agent",
+      "category": "agent",
+      "description": "Replit Agent 是 Replit 的应用构建 agent，可从自然语言需求生成、运行和迭代应用。",
+      "weight": 3,
+      "sources": [
+        "https://docs.replit.com/replitai/agent"
+      ],
+      "related": []
+    },
+    {
+      "name": "Retrieval",
+      "category": "term",
+      "description": "Retrieval 是从知识库、文档或搜索系统中取回相关信息的步骤。",
+      "weight": 3,
+      "sources": [
+        "https://platform.openai.com/docs"
+      ],
+      "related": [
+        "LLM",
+        "Planner",
+        "Sandbox",
+        "Model Context",
+        "Skill",
+        "Workflow"
+      ]
+    },
+    {
+      "name": "Skills Catalog",
+      "category": "resource",
+      "description": "Skills catalog：[Bundled Skills Catalog](https://hermes-agent.nousresearch.com/docs/referenc...",
+      "weight": 3,
+      "sources": [
+        "study/ai-tools/agent-engineering.md"
+      ],
+      "related": [
+        "LLM",
+        "Planner",
+        "Sandbox",
+        "Model Context",
+        "MCP",
+        "Skill"
+      ]
+    },
+    {
+      "name": "Sourcegraph Cody",
+      "category": "agent",
+      "description": "Sourcegraph Cody 是面向代码库理解、搜索和生成的 AI 编程助手。",
+      "weight": 3,
+      "sources": [
+        "https://sourcegraph.com/cody"
+      ],
+      "related": []
+    },
+    {
+      "name": "Speech to Text",
+      "category": "term",
+      "description": "Speech to Text 把语音转成文字，常用于语音输入、会议记录和字幕。",
+      "weight": 3,
+      "sources": [
+        "https://platform.openai.com/docs"
+      ],
+      "related": [
+        "LLM",
+        "Planner",
+        "Sandbox",
+        "Model Context",
+        "Skill",
+        "Workflow"
+      ]
+    },
+    {
+      "name": "State Graph",
+      "category": "term",
+      "description": "State Graph 是用状态和节点流转表达复杂 agent 工作流的图结构。",
+      "weight": 3,
+      "sources": [
+        "https://platform.openai.com/docs"
+      ],
+      "related": [
+        "LLM",
+        "Planner",
+        "Sandbox",
+        "Model Context",
+        "Skill",
+        "Workflow"
+      ]
+    },
+    {
+      "name": "System Prompt",
+      "category": "term",
+      "description": "System Prompt 是高优先级指令，用来定义模型角色、边界和行为规则。",
+      "weight": 3,
+      "sources": [
+        "https://platform.openai.com/docs"
+      ],
+      "related": [
+        "LLM",
+        "Planner",
+        "Sandbox",
+        "Model Context",
+        "Skill",
+        "Workflow"
+      ]
+    },
+    {
+      "name": "Temperature",
+      "category": "term",
+      "description": "Temperature 控制生成随机性，数值越高输出通常越发散。",
+      "weight": 3,
+      "sources": [
+        "study/ai-tools/tradingagents-notes.md",
+        "https://platform.openai.com/docs"
+      ],
+      "related": [
+        "LLM",
+        "Planner",
+        "Sandbox",
+        "Model Context",
+        "MCP",
+        "Skill"
+      ]
+    },
+    {
+      "name": "Text to Speech",
+      "category": "term",
+      "description": "Text to Speech 把文字合成为语音，常用于语音助手和朗读场景。",
+      "weight": 3,
+      "sources": [
+        "https://platform.openai.com/docs"
+      ],
+      "related": [
+        "LLM",
+        "Planner",
+        "Sandbox",
+        "Model Context",
+        "Skill",
+        "Workflow"
+      ]
+    },
+    {
+      "name": "Tool Calling",
+      "category": "term",
+      "description": "Tool Calling 是模型选择并调用外部工具来完成查询、执行动作或获取数据的能力。",
+      "weight": 3,
+      "sources": [
+        "https://platform.openai.com/docs/guides/function-calling"
+      ],
+      "related": [
+        "Function Calling"
+      ]
+    },
+    {
+      "name": "Transformer",
+      "category": "term",
+      "description": "Transformer 是现代大模型的核心神经网络架构，依靠注意力机制处理序列信息。",
+      "weight": 3,
+      "sources": [
+        "https://platform.openai.com/docs"
+      ],
+      "related": [
+        "LLM",
+        "Planner",
+        "Sandbox",
+        "Model Context",
+        "Skill",
+        "Workflow"
+      ]
+    },
+    {
+      "name": "Vector Database",
+      "category": "term",
+      "description": "Vector Database 用于存储和检索向量，支持语义相似度搜索。",
+      "weight": 3,
+      "sources": [
+        "https://platform.openai.com/docs"
+      ],
+      "related": [
+        "LLM",
+        "Planner",
+        "Sandbox",
+        "Model Context",
+        "Skill",
+        "Workflow"
+      ]
+    },
+    {
+      "name": "Vector Store",
+      "category": "term",
+      "description": "Vector Store 是向量存储层，常用于检索增强生成和语义搜索。",
+      "weight": 3,
+      "sources": [
+        "https://platform.openai.com/docs"
+      ],
+      "related": [
+        "LLM",
+        "Planner",
+        "Sandbox",
+        "Model Context",
+        "Skill",
+        "Workflow"
+      ]
+    },
+    {
+      "name": "Vision Model",
+      "category": "term",
+      "description": "Vision Model 是能理解图像或视觉输入的模型。",
+      "weight": 3,
+      "sources": [
+        "https://platform.openai.com/docs"
+      ],
+      "related": [
+        "LLM",
+        "Planner",
+        "Sandbox",
+        "Model Context",
+        "Skill",
+        "Workflow"
+      ]
+    },
+    {
+      "name": "WorkBuddy",
+      "category": "agent",
+      "description": "WorkBuddy 是腾讯云推出的个人 AI agent workspace，面向文档、研究、办公和多场景 AI 工作流。",
+      "weight": 3,
+      "sources": [
+        "https://www.tencentcloud.com/act/pro/workbuddy"
+      ],
+      "related": []
+    },
+    {
+      "name": "世界经济论坛发布工业人机协作框架",
+      "category": "trend",
+      "description": "| 世界经济论坛发布工业人机协作框架 | 技术更新 / 行业热点 | WEF 于 2026 年 6 月 23 日发布框架，覆盖制造与供应链 80 多类岗位，指出 75% 工业岗位将转...",
+      "weight": 3,
+      "sources": [
+        "study/news-trends/daily/2026-06-28.md"
+      ],
+      "related": [
+        "LLM",
+        "观察",
+        "技术更新",
+        "AI 圈新闻",
+        "社会热点",
+        "行业热点"
+      ]
+    },
+    {
+      "name": "中国发布 2026-2030 就业优先实施方案",
+      "category": "trend",
+      "description": "| 中国发布 2026-2030 就业优先实施方案 | 社会热点 / 行业热点 / 经济热点 | 中国政府网 2026 年 6 月 17 日发布国务院方案，强调在 2026-2030...",
+      "weight": 3,
+      "sources": [
+        "study/news-trends/daily/2026-06-28.md"
+      ],
+      "related": [
+        "LLM",
+        "观察",
+        "技术更新",
+        "AI 圈新闻",
+        "社会热点",
+        "行业热点"
+      ]
+    },
+    {
+      "name": "中国央行净投放中长期流动性",
+      "category": "trend",
+      "description": "| 中国央行净投放中长期流动性 | 经济热点 | 新华社报道央行开展 5000 亿元 MLF 操作，本月净投放 2000 亿元。 | 政策层仍在为信用扩张、发债与增长托底提供流动性环...",
+      "weight": 3,
+      "sources": [
+        "study/news-trends/daily/2026-06-26.md"
+      ],
+      "related": [
+        "观察",
+        "技术更新",
+        "AI 圈新闻",
+        "社会热点",
+        "行业热点",
+        "经济热点"
+      ]
+    },
+    {
+      "name": "中国政策与产业方向：高端装备、智能化、绿色化",
+      "category": "trend",
+      "description": "中国政策与产业方向：高端装备、智能化、绿色化 属于新闻趋势，来自 study 学习笔记。",
+      "weight": 3,
+      "sources": [
+        "study/news-trends/daily/2026-06-23.md"
+      ],
+      "related": [
+        "观察",
+        "技术更新",
+        "AI 圈新闻",
+        "社会热点",
+        "行业热点",
+        "经济热点"
+      ]
+    },
+    {
+      "name": "供应链博览会显示 AI 正从单点工具变成产业链底层能力",
+      "category": "trend",
+      "description": "| 供应链博览会显示 AI 正从单点工具变成产业链底层能力 | 技术更新 / 行业热点 / 经济热点 | 新华社报道 AI 已渗入制造、农业、医疗等多条产业链。 | 下一阶段更值得盯...",
+      "weight": 3,
+      "sources": [
+        "study/news-trends/daily/2026-06-26.md"
+      ],
+      "related": [
+        "观察",
+        "技术更新",
+        "AI 圈新闻",
+        "社会热点",
+        "行业热点",
+        "经济热点"
+      ]
+    },
+    {
+      "name": "全球 40 位市长签署城市数据中心 pact",
+      "category": "trend",
+      "description": "| 全球 40 位市长签署城市数据中心 pact | 社会热点 / 行业热点 / 经济热点 | AP 与 C40 于 2026 年 6 月 23 日报道，40 位市长联合推动约束城市...",
+      "weight": 3,
+      "sources": [
+        "study/news-trends/daily/2026-06-29.md"
+      ],
+      "related": [
+        "观察",
+        "Benchmark",
+        "技术更新",
+        "AI 圈新闻",
+        "社会热点",
+        "行业热点"
+      ]
+    },
+    {
+      "name": "城市开始给数据中心扩张设边界",
+      "category": "trend",
+      "description": "城市开始给数据中心扩张设边界 属于新闻趋势，来自 study 学习笔记。",
+      "weight": 3,
+      "sources": [
+        "study/news-trends/daily/2026-06-24.md"
+      ],
+      "related": [
+        "观察",
+        "技术更新",
+        "AI 圈新闻",
+        "社会热点",
+        "行业热点",
+        "经济热点"
+      ]
+    },
+    {
+      "name": "夏季达沃斯把 AI 对就业结构的重塑推到台前",
+      "category": "trend",
+      "description": "| 夏季达沃斯把 AI 对就业结构的重塑推到台前 | AI 圈新闻 / 行业热点 / 社会热点 | 新华社援引 WEF 报告称，AI 正改变初级岗位成长路径，青年和白领岗位暴露度更高...",
+      "weight": 3,
+      "sources": [
+        "study/news-trends/daily/2026-06-26.md"
+      ],
+      "related": [
+        "观察",
+        "技术更新",
+        "AI 圈新闻",
+        "社会热点",
+        "行业热点",
+        "经济热点"
+      ]
+    },
+    {
+      "name": "夏季达沃斯继续强调 AI 规模化与先进制造",
+      "category": "trend",
+      "description": "夏季达沃斯继续强调 AI 规模化与先进制造 属于新闻趋势，来自 study 学习笔记。",
+      "weight": 3,
+      "sources": [
+        "study/news-trends/daily/2026-06-24.md"
+      ],
+      "related": [
+        "观察",
+        "技术更新",
+        "AI 圈新闻",
+        "社会热点",
+        "行业热点",
+        "经济热点"
+      ]
+    },
+    {
+      "name": "委内瑞拉地震死亡人数升至 235",
+      "category": "trend",
+      "description": "| 委内瑞拉地震死亡人数升至 235 | 社会热点 | 新华社 2026 年 6 月 26 日快讯称，地震死亡人数已升至 235。 | 大型自然灾害仍是影响公共安全、财政支出与区域经...",
+      "weight": 3,
+      "sources": [
+        "study/news-trends/daily/2026-06-26.md"
+      ],
+      "related": [
+        "观察",
+        "技术更新",
+        "AI 圈新闻",
+        "社会热点",
+        "行业热点",
+        "经济热点"
+      ]
+    },
+    {
+      "name": "宏观与社会热点：能源、财政、气候与 PMI",
+      "category": "trend",
+      "description": "宏观与社会热点：能源、财政、气候与 PMI 属于新闻趋势，来自 study 学习笔记。",
+      "weight": 3,
+      "sources": [
+        "study/news-trends/daily/2026-06-23.md"
+      ],
+      "related": [
+        "观察",
+        "技术更新",
+        "AI 圈新闻",
+        "社会热点",
+        "行业热点",
+        "经济热点"
+      ]
+    },
+    {
+      "name": "微软宣布得州 Pecos 新建 2GW 数据中心园区",
+      "category": "trend",
+      "description": "| 微软宣布得州 Pecos 新建 2GW 数据中心园区 | 技术更新 / 行业热点 / 经济热点 | 微软于 2026 年 6 月 22 日宣布在得州 Pecos 新增约 2GW ...",
+      "weight": 3,
+      "sources": [
+        "study/news-trends/daily/2026-06-29.md"
+      ],
+      "related": [
+        "观察",
+        "Benchmark",
+        "技术更新",
+        "AI 圈新闻",
+        "社会热点",
+        "行业热点"
+      ]
+    },
+    {
+      "name": "德州要求保护居民免受数据中心扩张成本转嫁",
+      "category": "trend",
+      "description": "| 德州要求保护居民免受数据中心扩张成本转嫁 | 社会热点 / 行业热点 / 经济热点 | 德州州长要求 PUC 和 ERCOT 立即采取措施，避免数据中心扩张基础设施成本转嫁给居民...",
+      "weight": 3,
+      "sources": [
+        "study/news-trends/daily/2026-07-02.md"
+      ],
+      "related": [
+        "观察",
+        "Tools",
+        "Benchmark",
+        "技术更新",
+        "AI 圈新闻",
+        "社会热点"
+      ]
+    },
+    {
+      "name": "欧洲极端高温正在变成现实经济变量",
+      "category": "trend",
+      "description": "欧洲极端高温正在变成现实经济变量 属于新闻趋势，来自 study 学习笔记。",
+      "weight": 3,
+      "sources": [
+        "study/news-trends/daily/2026-06-24.md"
+      ],
+      "related": [
+        "观察",
+        "技术更新",
+        "AI 圈新闻",
+        "社会热点",
+        "行业热点",
+        "经济热点"
+      ]
+    },
+    {
+      "name": "欧洲热浪刷新多国纪录并冲击基础设施",
+      "category": "trend",
+      "description": "| 欧洲热浪刷新多国纪录并冲击基础设施 | 社会热点 / 经济热点 | AP 于 2026 年 6 月 27 日报道，欧洲多国高温破纪录，德国高速与铁路、法国医院和城市活动都受到明显...",
+      "weight": 3,
+      "sources": [
+        "study/news-trends/daily/2026-06-28.md"
+      ],
+      "related": [
+        "LLM",
+        "观察",
+        "技术更新",
+        "AI 圈新闻",
+        "社会热点",
+        "行业热点"
+      ]
+    },
+    {
+      "name": "美国 5 月 JOLTS 显示职位空缺与招聘基本持平",
+      "category": "trend",
+      "description": "| 美国 5 月 JOLTS 显示职位空缺与招聘基本持平 | 经济热点 / 社会热点 | 美国 BLS 6 月 30 日公布的 5 月 JOLTS 显示职位空缺约 760 万、招聘约...",
+      "weight": 3,
+      "sources": [
+        "study/news-trends/daily/2026-07-02.md"
+      ],
+      "related": [
+        "观察",
+        "Tools",
+        "Benchmark",
+        "技术更新",
+        "AI 圈新闻",
+        "社会热点"
+      ]
+    },
+    {
+      "name": "美国 5 月商品贸易逆差明显扩大",
+      "category": "trend",
+      "description": "| 美国 5 月商品贸易逆差明显扩大 | 经济热点 / 行业热点 | 美国 Census 6 月 26 日公布的 5 月先行指标显示商品贸易逆差扩大到 1058 亿美元。 | 宏观层...",
+      "weight": 3,
+      "sources": [
+        "study/news-trends/daily/2026-07-02.md"
+      ],
+      "related": [
+        "观察",
+        "Tools",
+        "Benchmark",
+        "技术更新",
+        "AI 圈新闻",
+        "社会热点"
+      ]
+    },
+    {
+      "name": "美国启动 RAISE US 应对 AI 时代就业调整",
+      "category": "trend",
+      "description": "| 美国启动 RAISE US 应对 AI 时代就业调整 | 社会热点 / 行业热点 | 一个由两党人物推动、筹资超 5 亿美元的新组织开始尝试应对 AI 带来的岗位适应问题。 | ...",
+      "weight": 3,
+      "sources": [
+        "study/news-trends/daily/2026-06-30.md"
+      ],
+      "related": [
+        "观察",
+        "Benchmark",
+        "技术更新",
+        "AI 圈新闻",
+        "社会热点",
+        "行业热点"
+      ]
+    },
+    {
+      "name": "美国启动 RAISE US 计划应对 AI 就业冲击",
+      "category": "trend",
+      "description": "| 美国启动 RAISE US 计划应对 AI 就业冲击 | AI 圈新闻 / 社会热点 / 经济热点 | AP 于 2026 年 6 月 26 日报道，RAISE US 以超 5 ...",
+      "weight": 3,
+      "sources": [
+        "study/news-trends/daily/2026-06-28.md"
+      ],
+      "related": [
+        "LLM",
+        "观察",
+        "技术更新",
+        "AI 圈新闻",
+        "社会热点",
+        "行业热点"
+      ]
+    },
+    {
+      "name": "美国核心通胀与总通胀再抬升",
+      "category": "trend",
+      "description": "| 美国核心通胀与总通胀再抬升 | 经济热点 / 社会热点 | AP 于 2026 年 6 月 26 日报道，美联储偏好的 PCE 指标升至三年高位，AI 相关硬件需求也是推力之一。...",
+      "weight": 3,
+      "sources": [
+        "study/news-trends/daily/2026-06-29.md"
+      ],
+      "related": [
+        "观察",
+        "Benchmark",
+        "技术更新",
+        "AI 圈新闻",
+        "社会热点",
+        "行业热点"
+      ]
+    },
+    {
+      "name": "美国电网监管要求加快 AI 数据中心接电",
+      "category": "trend",
+      "description": "| 美国电网监管要求加快 AI 数据中心接电 | 技术更新 / 行业热点 / 经济热点 | AP 报道美国联邦监管部门要求电网运营商加快为高耗电 AI 数据中心提供电力。 | 算力瓶...",
+      "weight": 3,
+      "sources": [
+        "study/news-trends/daily/2026-06-30.md"
+      ],
+      "related": [
+        "观察",
+        "Benchmark",
+        "技术更新",
+        "AI 圈新闻",
+        "社会热点",
+        "行业热点"
+      ]
+    },
+    {
+      "name": "美国白宫推动高级 AI 创新与安全行政令落地",
+      "category": "trend",
+      "description": "| 美国白宫推动高级 AI 创新与安全行政令落地 | AI 圈新闻 / 社会热点 / 技术更新 | 白宫 2026 年 6 月 2 日发布行政令，要求在加速创新的同时建立高级 AI ...",
+      "weight": 3,
+      "sources": [
+        "study/news-trends/daily/2026-06-29.md"
+      ],
+      "related": [
+        "观察",
+        "Benchmark",
+        "技术更新",
+        "AI 圈新闻",
+        "社会热点",
+        "行业热点"
+      ]
+    },
+    {
+      "name": "美国要求加快 AI 数据中心接电",
+      "category": "trend",
+      "description": "| 美国要求加快 AI 数据中心接电 | 社会热点 / 行业热点 / 经济热点 | 美国联邦监管层要求区域电网更快响应高耗电 AI 数据中心接入需求。 | 算力扩张的现实瓶颈越来越像...",
+      "weight": 3,
+      "sources": [
+        "study/news-trends/daily/2026-07-01.md"
+      ],
+      "related": [
+        "LLM",
+        "观察",
+        "技术更新",
+        "AI 圈新闻",
+        "社会热点",
+        "行业热点"
+      ]
+    },
+    {
+      "name": "美国通胀高位与 AI 相关需求共同抬升成本约束",
+      "category": "trend",
+      "description": "| 美国通胀高位与 AI 相关需求共同抬升成本约束 | 经济热点 / AI 圈新闻 | 美联储偏好的通胀指标维持高位，相关报道点名半导体和计算机设备价格受 AI 需求影响。 | AI...",
+      "weight": 3,
+      "sources": [
+        "study/news-trends/daily/2026-06-30.md"
+      ],
+      "related": [
+        "观察",
+        "Benchmark",
+        "技术更新",
+        "AI 圈新闻",
+        "社会热点",
+        "行业热点"
+      ]
+    },
+    {
+      "name": "美股反弹再次由 AI 相关资产主导",
+      "category": "trend",
+      "description": "| 美股反弹再次由 AI 相关资产主导 | AI 圈新闻 / 行业热点 / 经济热点 | 6 月 29 日美股反弹中，芯片与 AI 基建相关资产再次成为主要驱动力。 | 市场仍愿意为...",
+      "weight": 3,
+      "sources": [
+        "study/news-trends/daily/2026-06-30.md"
+      ],
+      "related": [
+        "观察",
+        "Benchmark",
+        "技术更新",
+        "AI 圈新闻",
+        "社会热点",
+        "行业热点"
+      ]
+    },
+    {
+      "name": "霍尔木兹海峡撤离方案暂停，全球能源与航运再起波动",
+      "category": "trend",
+      "description": "| 霍尔木兹海峡撤离方案暂停，全球能源与航运再起波动 | 经济热点 / 社会热点 | AP 报道联合国海事机构在船只遇袭后暂停相关撤离安排。 | 地缘冲突对油气、航运、保险和通胀预期...",
+      "weight": 3,
+      "sources": [
+        "study/news-trends/daily/2026-06-26.md"
+      ],
+      "related": [
+        "观察",
+        "技术更新",
+        "AI 圈新闻",
+        "社会热点",
+        "行业热点",
+        "经济热点"
+      ]
+    },
+    {
+      "name": "韩国推进 800 万亿韩元半导体集群",
+      "category": "trend",
+      "description": "| 韩国推进 800 万亿韩元半导体集群 | AI 圈新闻 / 行业热点 / 经济热点 | 三星电子与 SK 海力士宣布在韩国西南部建设新芯片制造中心，直接押注 AI 带来的长期算力...",
+      "weight": 3,
+      "sources": [
+        "study/news-trends/daily/2026-06-30.md"
+      ],
+      "related": [
+        "观察",
+        "Benchmark",
+        "技术更新",
+        "AI 圈新闻",
+        "社会热点",
+        "行业热点"
+      ]
+    },
+    {
+      "name": "韩国推进 800 万亿韩元芯片制造中心",
+      "category": "trend",
+      "description": "| 韩国推进 800 万亿韩元芯片制造中心 | AI 圈新闻 / 行业热点 / 经济热点 | 三星电子与 SK 海力士宣布建设超大规模芯片集群，直接押注 AI 长期需求。 | AI ...",
+      "weight": 3,
+      "sources": [
+        "study/news-trends/daily/2026-07-01.md"
+      ],
+      "related": [
+        "LLM",
+        "观察",
+        "技术更新",
+        "AI 圈新闻",
+        "社会热点",
+        "行业热点"
+      ]
+    }
+  ]
+}

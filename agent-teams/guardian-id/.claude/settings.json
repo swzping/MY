@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "figma-dev-mode": {
+      "command": "npx",
+      "args": ["figma-mcp@latest"],
+      "env": {
+        "FIGMA_API_TOKEN": "FIGMA_API_TOKEN_PLACEHOLDER"
+      }
+    }
+  }
+}

@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 240" role="img" aria-label="Bright Path logo">
+  <rect width="720" height="240" rx="36" fill="#17202a"/>
+  <g transform="translate(44 40)">
+    <path d="M10 128c36-45 71-68 108-68 24 0 43 8 61 24" fill="none" stroke="#f5b84b" stroke-width="16" stroke-linecap="round"/>
+    <path d="M46 136c24-23 49-35 76-35 16 0 30 4 44 13" fill="none" stroke="#f7efe2" stroke-width="9" stroke-linecap="round"/>
+    <circle cx="142" cy="30" r="22" fill="#f5b84b"/>
+    <path d="M142 0v10M142 50v10M112 30h10M162 30h10M120 8l8 8M156 44l8 8M164 8l-8 8M128 44l-8 8" stroke="#f5b84b" stroke-width="7" stroke-linecap="round"/>
+  </g>
+  <text x="260" y="112" fill="#f7efe2" font-family="Avenir Next, Inter, Arial, sans-serif" font-size="50" font-weight="700">Bright Path</text>
+  <text x="262" y="154" fill="#a9b4bd" font-family="Avenir Next, Inter, Arial, sans-serif" font-size="22">把今天整理成更好的明天</text>
+</svg>

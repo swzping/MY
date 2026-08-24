@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>财务发票助手 - 发票查重验真+信息提取</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <div class="container mx-auto px-4 py-8 max-w-6xl">
+        <header class="text-center mb-8">
+            <h1 class="text-4xl font-bold text-gray-800 mb-2">📊 财务发票助手</h1>
+            <p class="text-gray-600">上传发票图片，AI自动提取信息，查重提醒，导出CSV批量导入财务软件</p>
+        </header>
+
+        <!-- API Key -->
+        <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+            <h2 class="text-xl font-semibold text-gray-800 mb-4">配置</h2>
+            <div class="mb-4">
+                <label class="block text-sm font-medium text-gray-700 mb-2">OpenAI API Key</label>
+                <input type="password" id="apiKey" placeholder="sk-..."
+                       class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <p class="text-xs text-gray-500 mt-1">API Key存储在你本地浏览器，发票数据也保存在本地，不会上传到我们服务器</p>
+            </div>
+        </div>
+
+        <!-- Upload Area -->
+        <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+            <h2 class="text-xl font-semibold text-gray-800 mb-4">上传发票图片</h2>
+            <div id="dropZone" class="border-2 border-dashed border-gray-300 rounded-lg p-10 text-center hover:border-blue-400 transition-colors cursor-pointer">
+                <p class="text-gray-600 mb-2">拖放发票图片到这里，或点击选择文件</p>
+                <p class="text-sm text-gray-400">支持 JPG, PNG, 支持多张上传</p>
+                <input type="file" id="fileInput" accept="image/*" multiple class="hidden">
+                <button id="selectFileBtn" class="mt-4 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md transition-colors">选择文件</button>
+            </div>
+        </div>
+
+        <!-- Pending Recognition -->
+        <div id="pendingContainer" class="hidden bg-white rounded-lg shadow-md p-6 mb-6">
+            <h2 class="text-xl font-semibold text-gray-800 mb-4">待识别图片</h2>
+            <div id="previewList" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mb-4">
+            </div>
+            <div class="text-center">
+                <button id="recognizeAllBtn" class="px-6 py-2 bg-green-600 hover:bg-green-700 text-white font-medium rounded-md transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed">
+                    开始识别所有图片
+                </button>
+            </div>
+        </div>
+
+        <!-- Recognition Result (for current) -->
+        <div id="resultContainer" class="hidden bg-white rounded-lg shadow-md p-6 mb-6">
+            <h2 class="text-xl font-semibold text-gray-800 mb-4">识别结果（可编辑）</h2>
+            <div class="grid md:grid-cols-2 gap-4">
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">发票号码</label>
+                    <input type="text" id="invoiceNumber" class="w-full px-4 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">开票日期</label>
+                    <input type="date" id="invoiceDate" class="w-full px-4 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">总金额</label>
+                    <input type="number" step="0.01" id="totalAmount" class="w-full px-4 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">税额</label>
+                    <input type="number" step="0.01" id="taxAmount" class="w-full px-4 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+                <div class="mb-4 md:col-span-2">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">开票方名称</label>
+                    <input type="text" id="sellerName" class="w-full px-4 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+            </div>
+
+            <!-- Duplicate Check Result -->
+            <div id="duplicateResult" class="mb-4 p-4 rounded-md hidden"></div>
+
+            <div class="flex gap-4 justify-center">
+                <button id="saveBtn" class="px-6 py-2 bg-green-600 hover:bg-green-700 text-white font-medium rounded-md transition-colors">
+                    确认保存
+                </button>
+                <button id="skipBtn" class="px-6 py-2 bg-gray-600 hover:bg-gray-700 text-white font-medium rounded-md transition-colors">
+                    跳过这张
+                </button>
+            </div>
+        </div>
+
+        <!-- Saved Invoices -->
+        <div id="invoicesContainer" class="hidden bg-white rounded-lg shadow-md p-6 mb-6">
+            <h2 class="text-xl font-semibold text-gray-800 mb-4">已保存发票档案</h2>
+            <div class="overflow-x-auto">
+                <table class="w-full text-sm">
+                    <thead>
+                        <tr class="bg-gray-50">
+                            <th class="px-3 py-2 text-left">发票号码</th>
+                            <th class="px-3 py-2 text-left">开票日期</th>
+                            <th class="px-3 py-2 text-right">金额</th>
+                            <th class="px-3 py-2 text-left">开票方</th>
+                            <th class="px-3 py-2 text-center">状态</th>
+                            <th class="px-3 py-2 text-center">操作</th>
+                        </tr>
+                    </thead>
+                    <tbody id="invoicesBody">
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="mt-4 flex gap-4 justify-center">
+                <button id="exportCSVBtn" class="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md transition-colors">
+                    导出CSV
+                </button>
+                <button id="clearAllBtn" class="px-6 py-2 bg-red-600 hover:bg-red-700 text-white rounded-md transition-colors">
+                    清空所有
+                </button>
+            </div>
+        </div>
+
+        <footer class="mt-8 text-center text-gray-500 text-sm">
+            <p>© 2026 工具集 · 小而美，解决真问题</p>
+            <p class="mt-1">使用OpenAI GPT-4 Vision识别发票，API调用费用由你的OpenAI账号扣除</p>
+        </footer>
+
+        <!-- Toast -->
+        <div id="toast" class="fixed bottom-6 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white px-6 py-3 rounded-lg opacity-0 transition-opacity duration-300 hidden"></div>
+    </div>
+
+    <script src="../../shared/utils.js"></script>
+    <script>
+// Configuration
+const API_ENDPOINT = 'https://api.openai.com/v1/chat/completions';
+
+// State
+let invoices = [];
+let pendingImages = [];
+let currentIndex = 0;
+
+// DOM Elements
+const apiKeyInput = document.getElementById('apiKey');
+const dropZone = document.getElementById('dropZone');
+const fileInput = document.getElementById('fileInput');
+const selectFileBtn = document.getElementById('selectFileBtn');
+const pendingContainer = document.getElementById('pendingContainer');
+const previewList = document.getElementById('previewList');
+const recognizeAllBtn = document.getElementById('recognizeAllBtn');
+const resultContainer = document.getElementById('resultContainer');
+const invoiceNumberInput = document.getElementById('invoiceNumber');
+const invoiceDateInput = document.getElementById('invoiceDate');
+const totalAmountInput = document.getElementById('totalAmount');
+const taxAmountInput = document.getElementById('taxAmount');
+const sellerNameInput = document.getElementById('sellerName');
+const duplicateResult = document.getElementById('duplicateResult');
+const saveBtn = document.getElementById('saveBtn');
+const skipBtn = document.getElementById('skipBtn');
+const invoicesContainer = document.getElementById('invoicesContainer');
+const invoicesBody = document.getElementById('invoicesBody');
+const exportCSVBtn = document.getElementById('exportCSVBtn');
+const clearAllBtn = document.getElementById('clearAllBtn');
+
+// Load saved data
+document.addEventListener('DOMContentLoaded', () => {
+    const savedKey = getFromLocalStorage('openai_api_key', '');
+    if (savedKey) {
+        apiKeyInput.value = savedKey;
+    }
+
+    const savedInvoices = getFromLocalStorage('invoice_assistant_data', '');
+    if (savedInvoices) {
+        try {
+            invoices = JSON.parse(savedInvoices);
+            renderInvoices();
+            if (invoices.length > 0) {
+                invoicesContainer.classList.remove('hidden');
+            }
+        } catch (e) {
+            console.error('Failed to load saved invoices');
+        }
+    }
+});
+
+// Save API key
+apiKeyInput.addEventListener('change', () => {
+    saveToLocalStorage('openai_api_key', apiKeyInput.value);
+});
+
+// Drag and drop
+dropZone.addEventListener('dragover', (e) => {
+    e.preventDefault();
+    dropZone.classList.add('border-blue-500', 'bg-blue-50');
+});
+
+dropZone.addEventListener('dragleave', () => {
+    dropZone.classList.remove('border-blue-500', 'bg-blue-50');
+});
+
+dropZone.addEventListener('drop', (e) => {
+    e.preventDefault();
+    dropZone.classList.remove('border-blue-500', 'bg-blue-50');
+    const files = Array.from(e.dataTransfer.files).filter(f => f.type.startsWith('image/'));
+    addFiles(files);
+});
+
+// Select file button
+selectFileBtn.addEventListener('click', () => {
+    fileInput.click();
+});
+
+fileInput.addEventListener('change', () => {
+    const files = Array.from(fileInput.files);
+    addFiles(files);
+});
+
+function addFiles(files) {
+    files.forEach(file => {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            pendingImages.push({
+                name: file.name,
+                dataUrl: e.target.result
+            });
+            renderPreviews();
+            pendingContainer.classList.remove('hidden');
+        };
+        reader.readAsDataURL(file);
+    });
+}
+
+function renderPreviews() {
+    previewList.innerHTML = '';
+    pendingImages.forEach((img, index) => {
+        const div = document.createElement('div');
+        div.className = 'relative border rounded overflow-hidden';
+        div.innerHTML = `
+            <img src="${img.dataUrl}" class="w-full h-32 object-cover">
+            <button data-index="${index}" class="absolute top-1 right-1 w-6 h-6 bg-red-500 text-white rounded-full text-xs hover:bg-red-600">×</button>
+        `;
+        div.querySelector('button').addEventListener('click', () => {
+            pendingImages.splice(index, 1);
+            renderPreviews();
+            if (pendingImages.length === 0) {
+                pendingContainer.classList.add('hidden');
+            }
+        });
+        previewList.appendChild(div);
+    });
+}
+
+// Recognize all
+recognizeAllBtn.addEventListener('click', async () => {
+    const apiKey = apiKeyInput.value.trim();
+    if (!apiKey) {
+        showToast('请先输入OpenAI API Key');
+        return;
+    }
+
+    if (pendingImages.length === 0) {
+        showToast('请先上传发票图片');
+        return;
+    }
+
+    recognizeAllBtn.disabled = true;
+    recognizeAllBtn.textContent = '识别中...';
+
+    currentIndex = 0;
+    await recognizeCurrent();
+
+    recognizeAllBtn.disabled = false;
+    recognizeAllBtn.textContent = '开始识别所有图片';
+});
+
+async function recognizeCurrent() {
+    if (currentIndex >= pendingImages.length) {
+        // All done
+        pendingImages = [];
+        renderPreviews();
+        pendingContainer.classList.add('hidden');
+        resultContainer.classList.add('hidden');
+        showToast('所有图片识别完成');
+        return;
+    }
+
+    const currentImage = pendingImages[currentIndex];
+    resultContainer.classList.remove('hidden');
+
+    try {
+        const result = await recognizeInvoice(currentImage.dataUrl);
+        fillResult(result);
+        checkDuplicate();
+    } catch (error) {
+        console.error(error);
+        showToast('识别失败：' + error.message);
+        // Skip on error
+        currentIndex++;
+        await recognizeCurrent();
+    }
+}
+
+async function recognizeInvoice(base64Image) {
+    const apiKey = apiKeyInput.value.trim();
+
+    const prompt = `你是一个发票OCR识别助手，请提取这张发票图片中的关键信息。
+请直接输出JSON格式，不要其他文字。格式如下：
+{
+  "invoiceNumber": "发票号码字符串",
+  "invoiceDate": "YYYY-MM-DD格式日期，如果无法识别则留空",
+  "totalAmount": 总金额数字,
+  "taxAmount": 税额数字，如果找不到则写0,
+  "sellerName": "开票方公司名称字符串"
+}
+
+如果某些字段找不到就留空字符串或0，不要编造。`;
+
+    const response = await fetch(API_ENDPOINT, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + apiKey
+        },
+        body: JSON.stringify({
+            model: 'gpt-4o-mini',
+            messages: [
+                {
+                    role: 'user',
+                    content: [
+                        { type: 'text', text: prompt },
+                        { type: 'image_url', image_url: { url: base64Image } }
+                    ]
+                }
+            ],
+            temperature: 0
+        })
+    });
+
+    if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error?.message || 'API调用失败');
+    }
+
+    const data = await response.json();
+    const content = data.choices[0].message.content.trim();
+
+    try {
+        const cleanContent = content.replace(/^```json\n?/, '').replace(/\n?```$/, '');
+        return JSON.parse(cleanContent);
+    } catch (e) {
+        console.error('Parse failed:', content);
+        throw new Error('解析识别结果失败');
+    }
+}
+
+function fillResult(result) {
+    invoiceNumberInput.value = result.invoiceNumber || '';
+    invoiceDateInput.value = result.invoiceDate || '';
+    totalAmountInput.value = result.totalAmount || '';
+    taxAmountInput.value = result.taxAmount || 0;
+    sellerNameInput.value = result.sellerName || '';
+}
+
+function checkDuplicate() {
+    const number = invoiceNumberInput.value.trim();
+    if (!number) {
+        duplicateResult.classList.add('hidden');
+        return;
+    }
+
+    const existing = invoices.find(inv => inv.invoiceNumber === number);
+    if (existing) {
+        duplicateResult.classList.remove('hidden');
+        duplicateResult.className = 'mb-4 p-4 rounded-md bg-red-50 border border-red-200';
+        duplicateResult.innerHTML = `<strong class="text-red-700">⚠️ 警告：该发票号码已存在！已经报销过一次了。上次录入日期：${existing.createdAt}</strong>`;
+    } else {
+        duplicateResult.classList.remove('hidden');
+        duplicateResult.className = 'mb-4 p-4 rounded-md bg-green-50 border border-green-200';
+        duplicateResult.innerHTML = '<strong class="text-green-700">✓ 没问题：这是新发票，未录入过</strong>';
+    }
+}
+
+// Check duplicate on input change
+invoiceNumberInput.addEventListener('input', checkDuplicate);
+
+// Save current
+saveBtn.addEventListener('click', () => {
+    const invoiceNumber = invoiceNumberInput.value.trim();
+    const invoiceDate = invoiceDateInput.value;
+    const totalAmount = parseFloat(totalAmountInput.value);
+
+    if (!invoiceNumber) {
+        showToast('请输入发票号码');
+        return;
+    }
+
+    if (isNaN(totalAmount) || totalAmount <= 0) {
+        showToast('请输入正确的总金额');
+        return;
+    }
+
+    const invoice = {
+        id: Date.now(),
+        invoiceNumber,
+        invoiceDate,
+        totalAmount: isNaN(totalAmount) ? 0 : totalAmount,
+        taxAmount: parseFloat(taxAmountInput.value) || 0,
+        sellerName: sellerNameInput.value.trim(),
+        createdAt: new Date().toISOString().split('T')[0]
+    };
+
+    // Check again for duplicate
+    const existing = invoices.find(inv => inv.invoiceNumber === invoiceNumber && inv.id !== invoice.id);
+    if (existing && confirm('该发票号码已存在，确定要保存吗？')) {
+        // User confirmed, proceed
+    } else if (existing) {
+        return;
+    }
+
+    invoices.push(invoice);
+    saveData();
+    renderInvoices();
+    invoicesContainer.classList.remove('hidden');
+    showToast('发票已保存');
+
+    currentIndex++;
+    recognizeCurrent();
+});
+
+// Skip current
+skipBtn.addEventListener('click', () => {
+    currentIndex++;
+    recognizeCurrent();
+});
+
+function saveData() {
+    saveToLocalStorage('invoice_assistant_data', invoices);
+}
+
+function renderInvoices() {
+    invoicesBody.innerHTML = '';
+
+    invoices.forEach(inv => {
+        const isDuplicate = invoices.filter(i => i.invoiceNumber === inv.invoiceNumber).length > 1;
+
+        const row = document.createElement('tr');
+        row.className = 'border-t border-gray-200' + (isDuplicate ? ' bg-red-50' : '');
+
+        row.innerHTML = `
+            <td class="px-3 py-3">${inv.invoiceNumber}</td>
+            <td class="px-3 py-3">${inv.invoiceDate || ''}</td>
+            <td class="px-3 py-3 text-right">¥${inv.totalAmount.toFixed(2)}</td>
+            <td class="px-3 py-3">${inv.sellerName || ''}</td>
+            <td class="px-3 py-3 text-center">
+                ${isDuplicate ? '<span class="px-2 py-0.5 bg-red-100 text-red-700 rounded-full text-xs">重复</span>' : '<span class="px-2 py-0.5 bg-green-100 text-green-700 rounded-full text-xs">正常</span>'}
+            </td>
+            <td class="px-3 py-3 text-center">
+                <button data-id="${inv.id}" class="delete-btn text-red-600 hover:text-red-800 text-sm">删除</button>
+            </td>
+        `;
+
+        row.querySelector('.delete-btn').addEventListener('click', () => {
+            if (confirm('确认删除这条发票记录吗？')) {
+                invoices = invoices.filter(i => i.id !== inv.id);
+                saveData();
+                renderInvoices();
+                if (invoices.length === 0) {
+                    invoicesContainer.classList.add('hidden');
+                }
+                showToast('已删除');
+            }
+        });
+
+        invoicesBody.appendChild(row);
+    });
+}
+
+// Export CSV
+exportCSVBtn.addEventListener('click', () => {
+    if (invoices.length === 0) {
+        showToast('没有发票数据可导出');
+        return;
+    }
+
+    const headers = ['发票号码', '开票日期', '总金额', '税额', '开票方', '录入日期'];
+    const rows = [headers.join(',')];
+
+    invoices.forEach(inv => {
+        const row = [
+            `"${(inv.invoiceNumber || '').replace(/"/g, '""')}"`,
+            inv.invoiceDate || '',
+            inv.totalAmount,
+            inv.taxAmount,
+            `"${(inv.sellerName || '').replace(/"/g, '""')}"`,
+            inv.createdAt
+        ];
+        rows.push(row.join(','));
+    });
+
+    const csv = rows.join('\n');
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'invoices.csv';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+
+    showToast('CSV导出成功');
+});
+
+// Clear all
+clearAllBtn.addEventListener('click', () => {
+    if (confirm('确认清空所有发票记录吗？此操作不可恢复！')) {
+        invoices = [];
+        saveData();
+        renderInvoices();
+        invoicesContainer.classList.add('hidden');
+        showToast('已清空所有记录');
+    }
+});
+    </script>
+</body>
+</html>

@@ -1,0 +1,57 @@
+model = "gpt-5.5"
+model_reasoning_effort = "medium"
+model_provider = "51token"
+review_model = "gpt-5.4"
+web_search = "live"
+
+
+[model_providers.51token]
+name = "51token"
+approval_policy = "on-request"
+base_url = "https://api.upit.top/51Token/v1"
+sandbox_mode = "workspace-write" # 或 "danger-full-access"
+wire_api = "responses"
+
+[features]
+js_repl = false
+
+# Portable additions managed by my-codex-portable-kit.
+# Keep authentication secrets out of this file. Login again on each machine.
+
+[desktop]
+localeOverride = "zh-CN"
+
+[mcp_servers.figma]
+url = "https://mcp.figma.com/mcp"
+enabled = true
+
+# Built-in/plugin entries below are optional. Codex may recreate them after installing from the UI.
+[plugins."documents@openai-primary-runtime"]
+enabled = true
+
+[plugins."spreadsheets@openai-primary-runtime"]
+enabled = true
+
+[plugins."presentations@openai-primary-runtime"]
+enabled = true
+
+[plugins."pdf@openai-primary-runtime"]
+enabled = true
+
+[plugins."browser@openai-bundled"]
+enabled = true
+
+[plugins."visualize@openai-bundled"]
+enabled = true
+
+[plugins."template-creator@openai-primary-runtime"]
+enabled = true
+
+[plugins."github@openai-api-curated"]
+enabled = true
+
+[plugins."hyperframes@openai-api-curated"]
+enabled = true
+
+[plugins."bright-path@personal"]
+enabled = true

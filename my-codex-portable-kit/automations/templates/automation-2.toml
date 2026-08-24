@@ -1,0 +1,11 @@
+version = 1
+id = "automation-2"
+kind = "cron"
+name = "每日晨报"
+prompt = "生成一份简洁的每日晨报，面向今天的工作开始。请先读取 <MY_WORKSPACE>/工作待办.md 中的待办事项，再结合今天日期，整理：重要日程/待办提醒、AI/科技与宏观要闻摘要、需要关注的风险或机会，以及一个清晰的今日优先级建议。需要最新信息时请联网核实。"
+status = "PAUSED"
+rrule = "FREQ=DAILY;BYHOUR=9;BYMINUTE=30;BYSECOND=0"
+model = "gpt-5.3-codex"
+reasoning_effort = "low"
+execution_environment = "local"
+cwds = ["<MY_WORKSPACE>"]

@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" role="img" aria-label="Bright Path icon">
+  <rect width="256" height="256" rx="48" fill="#17202a"/>
+  <path d="M50 186c34-42 66-64 101-64 22 0 39 8 55 22" fill="none" stroke="#f5b84b" stroke-width="18" stroke-linecap="round"/>
+  <path d="M85 194c23-22 47-33 72-33 15 0 28 4 41 12" fill="none" stroke="#f7efe2" stroke-width="10" stroke-linecap="round" opacity=".9"/>
+  <circle cx="176" cy="76" r="25" fill="#f5b84b"/>
+  <path d="M176 34v14M176 104v14M134 76h14M204 76h14M146 46l10 10M196 96l10 10M206 46l-10 10M156 96l-10 10" stroke="#f5b84b" stroke-width="8" stroke-linecap="round"/>
+</svg>

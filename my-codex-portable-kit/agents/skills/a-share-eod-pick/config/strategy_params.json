@@ -1,0 +1,289 @@
+{
+  "version": "1.0.16",
+  "strategy_name": "a-share-eod-pick",
+  "updated_at": "2026-06-28T09:28:00.000000",
+  "factors": {
+    "F1_tail_fund_inflow": {
+      "weight": 0.198,
+      "desc": "尾盘资金净流入",
+      "calc": "main_net_1430_1500 / float_mv",
+      "score_range": [
+        0,
+        100
+      ]
+    },
+    "F2_volume_price_sync": {
+      "weight": 0.0674,
+      "desc": "量价协同",
+      "calc": "tail_volume_ratio * price_consistency",
+      "score_range": [
+        0,
+        100
+      ]
+    },
+    "F3_technical_pattern": {
+      "weight": 0.0971,
+      "desc": "技术形态",
+      "calc": "macd_signal + rsi_zone + ma_alignment",
+      "score_range": [
+        0,
+        100
+      ]
+    },
+    "F4_tail_rally_strength": {
+      "weight": 0.287,
+      "desc": "尾盘拉升强度",
+      "calc": "(close_1500 - price_1430) / price_1430 * tail_volume_share",
+      "score_range": [
+        0,
+        100
+      ]
+    },
+    "F5_sector_heat": {
+      "weight": 0.0485,
+      "desc": "板块热度",
+      "calc": "sector_rank_score + leader_linkage",
+      "score_range": [
+        0,
+        100
+      ]
+    },
+    "F6_news_catalyst": {
+      "weight": 0.0485,
+      "desc": "消息面催化",
+      "calc": "positive_announcement_count + policy_match",
+      "score_range": [
+        0,
+        100
+      ],
+      "default_no_news": 50
+    },
+    "F7_float_mv_fit": {
+      "weight": 0.034,
+      "desc": "流通市值适配",
+      "calc": "gaussian(ln(float_mv), mu=ln(20e8), sigma=0.6)",
+      "score_range": [
+        0,
+        100
+      ]
+    },
+    "F8_overnight_risk_control": {
+      "weight": 0.1822,
+      "desc": "隔夜追高风险控制",
+      "calc": "upper_shadow + overextension + volume_chase risk inverse",
+      "score_range": [
+        0,
+        100
+      ]
+    },
+    "F9_overheat_control": {
+      "weight": 0.0081,
+      "desc": "过热控制",
+      "calc": "day_return + ma_bias + short_term_extension risk inverse",
+      "score_range": [
+        0,
+        100
+      ]
+    },
+    "F10_trend_momentum": {
+      "weight": 0.0097,
+      "desc": "趋势动能",
+      "calc": "trend_momentum_5d_vs_20d + MA方向",
+      "score_range": [
+        0,
+        100
+      ]
+    },
+    "F11_financial_quality": {
+      "weight": 0.0097,
+      "desc": "财务质量",
+      "calc": "roe/margin/debt/盈利增速（缺失用价格波动代理）",
+      "score_range": [
+        0,
+        100
+      ]
+    },
+    "F12_market_sentiment": {
+      "weight": 0.0098,
+      "desc": "市场情绪",
+      "calc": "股价涨跌、量能偏离与振幅偏离",
+      "score_range": [
+        0,
+        100
+      ]
+    }
+  },
+  "prefilter": {
+    "price_min": 3.0,
+    "price_max": 100.0,
+    "amount_min": 50000000,
+    "float_mv_min": 500000000,
+    "float_mv_max": 50000000000,
+    "listed_days_min": 60,
+    "exclude_st": true,
+    "exclude_limit_up_down": true,
+    "exclude_suspended": true
+  },
+  "selection": {
+    "top_n": 1,
+    "score_threshold": 55.0,
+    "max_per_sector": 1,
+    "allow_empty_when_market_drop": true,
+    "market_drop_threshold": -0.02,
+    "min_factor_scores": {
+      "F2_volume_price_sync": 65,
+      "F8_overnight_risk_control": 70,
+      "F3_technical_pattern": 70,
+      "F9_overheat_control": 85
+    },
+    "max_factor_scores": {
+      "F7_float_mv_fit": 50,
+      "F1_tail_fund_inflow": 90,
+      "F8_overnight_risk_control": 90
+    },
+    "counterfactual_rescue": {
+      "enabled": true,
+      "rescue_score_threshold": 80,
+      "max_blockers": 3,
+      "min_rescue_score_advantage": 12,
+      "rescue_min_factor_scores": {
+        "F3_technical_pattern": 80,
+        "F7_float_mv_fit": 60
+      }
+    },
+    "neighbor_counterfactual_rescue": {
+      "enabled": true,
+      "rescue_score_threshold": 65,
+      "max_blockers": 1,
+      "min_rescue_score_advantage": 0,
+      "allowed_blocker_prefixes": [
+        "F2_volume_price_sync<min"
+      ],
+      "required_blocker_prefixes": [
+        "F2_volume_price_sync<min"
+      ],
+      "rescue_min_factor_scores": {
+        "F3_technical_pattern": 75,
+        "F4_tail_rally_strength": 65,
+        "F8_overnight_risk_control": 70,
+        "F9_overheat_control": 85
+      },
+      "rescue_when_base_absent_only": true,
+      "neighbor_factor_keys": [
+        "F1_tail_fund_inflow",
+        "F3_technical_pattern",
+        "F4_tail_rally_strength",
+        "F7_float_mv_fit",
+        "F8_overnight_risk_control",
+        "F9_overheat_control"
+      ],
+      "nearest_neighbor_count": 3,
+      "min_prior_neighbors": 2,
+      "min_neighbor_win_rate": 0.6,
+      "min_neighbor_avg_return": 0
+    }
+  },
+  "validation": {
+    "buy_window_start": "09:30",
+    "buy_window_end": "09:40",
+    "sell_mode": "next_open",
+    "stop_loss": -0.03,
+    "take_profit": 0.05,
+    "sell_close_time": "15:00"
+  },
+  "execution_model": {
+    "buy_mode": "tail_advice",
+    "buy_time": "14:45",
+    "desc": "默认历史训练口径：优先按 14:40-14:55 尾盘建议执行价买入；历史分钟数据缺失时使用尾盘代理价，并在买入价来源中标记"
+  },
+  "execution_costs": {
+    "entry_slippage_bps": 5,
+    "exit_slippage_bps": 5,
+    "commission_rate": 0.0003,
+    "stamp_duty_rate": 0.0005,
+    "require_valid_ohlcv": true,
+    "skip_limit_entry": true,
+    "skip_limit_exit": true
+  },
+  "execution_advice": {
+    "window_start": "14:40",
+    "window_end": "14:55",
+    "preferred_price": "靠近尾盘均价，不追全天高位",
+    "confirm_condition": "尾盘资金和量价继续确认",
+    "give_up_condition": "14:50后冲到全天高位附近且承接转弱",
+    "desc": "真实纸面执行建议：训练、回放与今日推荐统一按尾盘窗口建模；卖出验证仍使用次日开盘价"
+  },
+  "optimization": {
+    "review_window": 30,
+    "adjust_step": 0.03,
+    "adjust_max_step": 0.05,
+    "top_factors_boost": 2,
+    "bottom_factors_cut": 2,
+    "rollback_if_worse": true,
+    "min_samples": 20,
+    "candidate_pool_size": 20
+  },
+  "risk_control": {
+    "max_consecutive_loss": 3,
+    "win_rate_7d_alert": 0.5,
+    "win_rate_30d_alert": 0.55,
+    "win_rate_total_alert": 0.55,
+    "min_pl_ratio": 1.5,
+    "cooldown_days_after_max_loss": 1
+  },
+  "data_source_priority": {
+    "realtime_quote": [
+      "mootdx",
+      "tencent",
+      "sina"
+    ],
+    "daily_k": [
+      "mootdx",
+      "tencent",
+      "baidu"
+    ],
+    "fund_flow": [
+      "eastmoney",
+      "10jqka",
+      "mootdx"
+    ],
+    "f10": [
+      "mootdx",
+      "eastmoney"
+    ],
+    "announcement": [
+      "cninfo",
+      "eastmoney"
+    ],
+    "sector": [
+      "eastmoney",
+      "10jqka"
+    ]
+  },
+  "strategy_mode": "single_formal_balance",
+  "balance_target": {
+    "min_participation": 0.35,
+    "max_participation": 0.45,
+    "min_win_rate": 0.7,
+    "max_consecutive_loss": 3,
+    "min_avg_return": 0.0,
+    "validation_ratio": 0.3,
+    "min_validation_samples": 20
+  },
+  "execution_revisit": {
+    "enabled": true,
+    "checkpoints": [
+      "10:00",
+      "13:00",
+      "14:00",
+      "14:15",
+      "14:40"
+    ],
+    "early_entry_threshold_score": 88.0,
+    "early_entry_max_risk_drop": 22.0
+  },
+  "factor_contrib": {
+    "lookback_days": 30,
+    "candidate_scope": "candidate_pool"
+  }
+}

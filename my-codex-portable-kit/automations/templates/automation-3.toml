@@ -1,0 +1,8 @@
+version = 1
+id = "automation-3"
+kind = "heartbeat"
+name = "验证尾盘买入收益报告"
+prompt = "基于 <MY_STOCK_WORKSPACE> 当前工作区，按修正后的第一策略规则生成尾盘买入与次日开盘/冲高收益验证报告。读取最近一笔 trade_log.csv 纸面交易和 reports/strategy_01 对应日期报告；拉取次日实时/分钟数据，记录尾盘具体买入时间点、模拟买入价、次日开盘价、开盘收益、9:30-9:45/9:50 最高价、最高收益、是否达到预期、失败或成功原因；更新 trade_log.csv 和生成 reports/strategy_01/YYYY-MM-DD_tail_entry_open_review.md。"
+status = "PAUSED"
+rrule = "FREQ=DAILY;COUNT=1;BYHOUR=9;BYMINUTE=50;BYSECOND=0"
+target_thread_id = "<replace-with-target-thread-id>"

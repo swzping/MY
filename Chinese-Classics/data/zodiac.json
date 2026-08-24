@@ -1,0 +1,16 @@
+[
+  {
+    "name": "鼠",
+    "element": "水",
+    "traits": ["机智", "灵活", "谨慎"],
+    "compatibility": ["牛", "龙", "猴"],
+    "conflict": ["马"]
+  },
+  {
+    "name": "牛",
+    "element": "土",
+    "traits": ["勤奋", "稳重", "固执"],
+    "compatibility": ["鼠", "蛇", "鸡"],
+    "conflict": ["羊"]
+  }
+]

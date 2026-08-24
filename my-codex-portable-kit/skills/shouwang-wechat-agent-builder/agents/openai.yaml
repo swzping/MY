@@ -1,0 +1,4 @@
+interface:
+  display_name: "守望微信智能体生成器"
+  short_description: "生成本机微信聊天分析桌面智能体"
+  default_prompt: "Use $shouwang-wechat-agent-builder to create a portable local WeChat analysis desktop agent in a target folder."

@@ -1,0 +1,4 @@
+interface:
+  display_name: "Daily Self Review"
+  short_description: "Review daily Codex behavior"
+  default_prompt: "Use $daily-self-review to inspect today's Codex usage behavior and turn it into optimizations, reusable insights, and a personal growth plan."

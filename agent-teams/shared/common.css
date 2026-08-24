@@ -1,0 +1,13 @@
+/* Common styles for all tools */
+.hidden {
+    display: none !important;
+}
+
+.toast-show {
+    opacity: 1 !important;
+}
+
+.copy-success {
+    background-color: #10b981 !important;
+    color: white !important;
+}

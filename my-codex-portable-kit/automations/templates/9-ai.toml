@@ -1,0 +1,11 @@
+version = 1
+id = "9-ai"
+kind = "cron"
+name = "AI情报扫描与输入流筛选"
+prompt = "每天 09:00 执行 AI/Agent/LLM 情报扫描，并把外部输入推进到“筛选和建议层”。\n\n默认知识库路径：<SW_KNOWLEDGE_VAULT>\n\n读取：\n- <SW_KNOWLEDGE_VAULT>/10-输入流/概念雷达/长期追踪/AI-Agent长期概念雷达.md\n- <SW_KNOWLEDGE_VAULT>/10-输入流/概念雷达/长期追踪/AI-Agent名词雷达索引.md\n- <SW_KNOWLEDGE_VAULT>/10-输入流/概念雷达/长期追踪/主流模型平台与工具产品雷达.md\n- <SW_KNOWLEDGE_VAULT>/00-入口/今日工作台.md\n- <SW_KNOWLEDGE_VAULT>/90-系统/规则/自动整理流程.md\n\n写入：\n- 日报：<SW_KNOWLEDGE_VAULT>/10-输入流/日报/AI圈新闻-YYYY-MM-DD.md\n- 每日概念筛选：<SW_KNOWLEDGE_VAULT>/10-输入流/概念雷达/每日筛选/YYYY-MM-DD-概念筛选.md\n- 今日整理建议：<SW_KNOWLEDGE_VAULT>/00-入口/今日整理建议.md\n- 必要时更新长期追踪文件。\n\n工作要求：\n1. 使用 Asia/Shanghai 当天日期生成 YYYY-MM-DD 文件名。\n2. 浏览并交叉参考近期来源，优先官方博客、GitHub Trending、Hacker News、arXiv、主要模型/AI 公司官方发布、开发者工具与基础设施项目。\n3. 重点关注对用户实际前端开发和 Agent 工作流有影响的主题：Codex、Claude Code、Cursor、GitHub Copilot、v0、Figma Make、Lovable、Bolt.new、Replit Agent、HyperFrames、MCP、Agent Skill、RAG、AI Gateway、Context Engineering、Loop Engineering、Agent Memory、Evals、Observability。\n4. 额外固定扫描 GitHub 维度：\n   - `star 增长最快` 的 AI/Agent/MCP/skill 相关项目。\n   - `累计 star 较高` 的 skill / 技能项目、agent workflow 项目、memory / browser / evals / context engineering 相关项目。\n   - 对入选项目尽量补充：它解决什么问题、适合哪些行业、适合哪些工作场景。\n5. 行业分类默认使用：前端研发、通用软件工程、设计协作、内容生产、数据分析、客服销售、运营投放、教育研究、企业内控/知识管理、垂直行业工作台。\n6. 工作场景分类默认使用：代码生成、代码审查、前端调试、浏览器自动化、知识检索/RAG、长期记忆、工作流编排、评测/观测、安全授权、设计到代码、文档整理、异步任务执行。\n7. 写入日报，结构包括：今日摘要、热点新闻 Top 10、GitHub 热门项目观察、开源项目/工具、模型/论文/API、值得跟踪的问题、参考来源。\n8. `GitHub 热门项目观察` 至少包含两部分：`Star 增长最快`、`高 Star skill / 技能项目`；每项尽量补一句行业/场景帮助说明。\n9. 基于日报生成“每日概念筛选”，回答：今天从日报里筛出哪些值得关注的概念、哪些只是噪音、哪些建议拆成原子知识、哪些主题地图可能需要更新；同时区分哪些只是热门仓库，哪些代表长期能力方向。\n10. 生成“今日整理建议”，包括：今日最值得关注的 3-5 个概念、建议拆成原子知识的 1-3 条、建议更新的主题地图、哪些来源值得放入原始资料证据库、需要用户确认的问题。\n11. 明确区分：日报是时间线；每日概念筛选是日报后的候选筛选；长期追踪是持续维护的概念/模型/平台/工具观察清单；原始资料只放重要证据。\n12. 不直接大量创建原子知识，不直接推进用户主动想法，不自动把普通链接塞入原始资料。\n13. 只有当某个概念、模型、平台或工具连续出现、重要性变化、或形成新判断时，才更新长期追踪文件。\n14. 更新 <SW_KNOWLEDGE_VAULT>/00-入口/今日工作台.md，在“今天要处理的输入”中加入当天日报、每日概念筛选和今日整理建议链接。\n15. 如果当天信息不足，也创建日报和概念筛选，并说明来源覆盖范围。"
+status = "PAUSED"
+rrule = "DTSTART;TZID=Asia/Shanghai:20260704T090000\nRRULE:FREQ=DAILY"
+model = "gpt-5.4"
+reasoning_effort = "medium"
+execution_environment = "local"
+cwds = ["<SW_KNOWLEDGE_VAULT>"]

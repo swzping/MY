@@ -1,0 +1,366 @@
+# 拼多多选品关键词挖掘工具 - 实现计划
+
+**Goal:** Build a web tool that expands related keywords for Pinduoduo product selection, shows estimated search volume and competition, helps sellers find blue ocean keywords.
+
+**Architecture:** Single HTML static page. Uses front-end to process data, get keyword suggestions from API or user can manually extend.
+
+**Tech Stack:**
+- HTML + vanilla JavaScript
+- Tailwind CSS via CDN
+- Simple keyword expansion algorithm
+- Export to CSV/text
+
+---
+
+## File Structure
+
+```
+tools/pdd-keyword-miner/
+├── index.html                 # Main tool page
+└── README.md                  # Documentation
+```
+
+---
+
+## Tasks
+
+### Task 1: Create the tool
+
+**Files:**
+- Create: `tools/pdd-keyword-miner/index.html`
+
+- [ ] **Step 1: Create full HTML + JavaScript**
+
+```html
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>拼多多关键词挖掘 - 找蓝海词工具</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <div class="container mx-auto px-4 py-8 max-w-5xl">
+        <header class="text-center mb-8">
+            <h1 class="text-4xl font-bold text-gray-800 mb-2">拼多多关键词挖掘</h1>
+            <p class="text-gray-600">输入核心词，批量扩展相关关键词，估算竞争度</p>
+        </header>
+
+        <div class="grid md:grid-cols-2 gap-6">
+            <!-- Input Panel -->
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <h2 class="text-xl font-semibold text-gray-800 mb-4">输入设置</h2>
+
+                <!-- Core Keyword -->
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">核心词</label>
+                    <textarea id="coreKeywords" placeholder="每行输入一个核心词，例如：&#10;连衣裙&#10;蓝牙耳机&#10;"
+                              class="w-full px-4 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                              rows="5"></textarea>
+                    <p class="text-xs text-gray-500 mt-1">每行一个核心词，支持多个同时扩展</p>
+                </div>
+
+                <!-- Expansion Depth -->
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">扩展深度：<span id="depthValue">2</span> 级</label>
+                    <input type="range" id="expansionDepth" min="1" max="3" value="2" step="1"
+                           class="w-full accent-blue-500">
+                    <p class="text-xs text-gray-500 mt-1">级别越高，生成关键词越多</p>
+                </div>
+
+                <div class="mt-6 text-center">
+                    <button id="expandBtn"
+                            class="bg-blue-600 hover:bg-blue-700 text-white font-medium px-8 py-3 rounded-md transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed">
+                        开始扩展关键词
+                    </button>
+                </div>
+            </div>
+
+            <!-- Info Panel -->
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <h2 class="text-xl font-semibold text-gray-800 mb-4">蓝海度说明</h2>
+                <div class="space-y-3 text-sm text-gray-600">
+                    <p><span class="font-semibold">蓝海词 = </span>搜索人数多，在线商品数少，竞争小机会大</p>
+                    <p><span class="font-semibold">竞争度公式 = </span>搜索人数 / 在线商品数</p>
+                    <p><span class="text-green-600 font-semibold">竞争度 &gt; 3</span> = 低竞争（蓝海）</p>
+                    <p><span class="text-yellow-600 font-semibold">竞争度 1-3</span> = 中等竞争</p>
+                    <p><span class="text-red-600 font-semibold">竞争度 &lt; 1</span> = 高竞争</p>
+                </div>
+
+                <div class="mt-6 p-4 bg-blue-50 rounded-lg">
+                    <p class="text-sm text-blue-800">
+                        <strong>使用提示：</strong> 扩展完关键词后，你可以将结果导出，复制到Excel进一步筛选。
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Results Table -->
+        <div class="mt-6 bg-white rounded-lg shadow-md p-6 hidden" id="resultsContainer">
+            <div class="mb-4 flex justify-between items-center">
+                <h2 class="text-xl font-semibold text-gray-800">扩展结果 <span class="text-gray-500 font-normal text-base" id="resultCount"></span></h2>
+                <button id="exportBtn" class="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-md transition-colors">导出CSV</button>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="w-full text-sm">
+                    <thead>
+                        <tr class="bg-gray-50">
+                            <th class="px-4 py-2 text-left">关键词</th>
+                            <th class="px-4 py-2 text-right">搜索人数</th>
+                            <th class="px-4 py-2 text-right">商品数</th>
+                            <th class="px-4 py-2 text-right">竞争度</th>
+                            <th class="px-4 py-2 text-center">等级</th>
+                        </tr>
+                    </thead>
+                    <tbody id="resultsBody">
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <footer class="mt-8 text-center text-gray-500 text-sm">
+            <p>© 2026 工具集 · 小而美，解决真问题</p>
+        </footer>
+
+        <!-- Toast Notification -->
+        <div id="toast" class="fixed bottom-6 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white px-6 py-3 rounded-lg opacity-0 transition-opacity duration-300 hidden"></div>
+    </div>
+
+    <script src="../../shared/utils.js"></script>
+    <script>
+// Common prefixes/suffixes for keyword expansion
+const PREFIXES = [
+    '新款', '夏季', '冬季', '春秋', '大码', '小个子', '大码女装', '胖mm',
+    '高端', '平价', '正品', '品牌', '原装', '国产', '进口',
+    '百搭', '显瘦', '修身', '宽松', '韩版', '日系', '复古', 'ins',
+    '网红', '抖音同款', '明星同款', '同款', '2026', '2025', '今年流行'
+];
+
+const SUFFIXES = [
+    '连衣裙', '牛仔裤', 'T恤', '卫衣', '外套', '毛衣', '裙子', '裤子',
+    '女', '女装', '男士', '男装', '男', '宝宝', '婴儿', '儿童', 'kids',
+    '百搭', '显瘦', '宽松', '大码', '小个子', '长款', '短款', '高腰',
+    '测评', '推荐', '哪个牌子好', '哪家好', '团购', '批发', '厂家',
+    '价格', '多少钱', '哪里买', '旗舰店', '官网', '旗舰店'
+];
+
+// DOM Elements
+const coreKeywordsInput = document.getElementById('coreKeywords');
+const expansionDepthInput = document.getElementById('expansionDepth');
+const depthValueSpan = document.getElementById('depthValue');
+const expandBtn = document.getElementById('expandBtn');
+const resultsContainer = document.getElementById('resultsContainer');
+const resultsBody = document.getElementById('resultsBody');
+const resultCount = document.getElementById('resultCount');
+const exportBtn = document.getElementById('exportBtn');
+
+// Update depth display
+expansionDepthInput.addEventListener('input', () => {
+    depthValueSpan.textContent = expansionDepthInput.value;
+});
+
+// Expand keywords
+expandBtn.addEventListener('click', () => {
+    const coreText = coreKeywordsInput.value.trim();
+    if (!coreText) {
+        showToast('请输入至少一个核心词');
+        return;
+    }
+
+    const coreLines = coreText.split('\\n').map(l => l.trim()).filter(l => l);
+    const depth = parseInt(expansionDepthInput.value);
+
+    let keywords = expandAllKeywords(coreLines, depth);
+    // Remove duplicates
+    keywords = [...new Set(keywords)];
+
+    // Generate simulated data (for MVP, we estimate competition)
+    const results = keywords.map(k => {
+        // Simulate search volume and product count
+        // In real version, this would come from API
+        const searchVolume = Math.floor(Math.random() * 10000);
+        const productCount = Math.floor(Math.random() * 10000);
+        const competition = searchVolume / Math.max(1, productCount);
+        return {
+            keyword: k,
+            searchVolume,
+            productCount,
+            competition
+        };
+    });
+
+    // Sort by competition descending (best first)
+    results.sort((a, b) => b.competition - a.competition);
+
+    displayResults(results);
+    showToast(\`扩展完成，共得到 \${results.length} 个关键词\`);
+});
+
+function expandAllKeywords(coreLines, depth) {
+    let result = [...coreLines];
+
+    for (let d = 1; d <= depth; d++) {
+        const currentLength = result.length;
+        for (let i = 0; i < currentLength; i++) {
+            const keyword = result[i];
+            // Add prefix combinations
+            PREFIXES.slice(0, depth * 5).forEach(prefix => {
+                result.push(prefix + keyword);
+            });
+            // Add suffix combinations
+            SUFFIXES.slice(0, depth * 5).forEach(suffix => {
+                result.push(keyword + suffix);
+            });
+        }
+    }
+
+    return result;
+}
+
+function displayResults(results) {
+    resultsBody.innerHTML = '';
+
+    results.forEach(r => {
+        const row = document.createElement('tr');
+        row.className = 'border-t border-gray-200';
+
+        let levelClass, levelText;
+        if (r.competition > 3) {
+            levelClass = 'text-green-600 font-semibold';
+            levelText = '蓝海';
+        } else if (r.competition >= 1) {
+            levelClass = 'text-yellow-600 font-semibold';
+            levelText = '中等';
+        } else {
+            levelClass = 'text-red-600 font-semibold';
+            levelText = '红海';
+        }
+
+        row.innerHTML = `
+            <td class="px-4 py-3 font-medium">${r.keyword}</td>
+            <td class="px-4 py-3 text-right">${r.searchVolume}</td>
+            <td class="px-4 py-3 text-right">${r.productCount}</td>
+            <td class="px-4 py-3 text-right">${r.competition.toFixed(2)}</td>
+            <td class="px-4 py-3 text-center ${levelClass}">${levelText}</td>
+        `;
+
+        resultsBody.appendChild(row);
+    });
+
+    resultCount.textContent = `(${results.length} 个关键词)`;
+    resultsContainer.classList.remove('hidden');
+}
+
+// Export CSV
+exportBtn.addEventListener('click', () => {
+    const rows = [];
+    // Header
+    rows.push(['关键词', '搜索人数', '商品数', '竞争度', '等级'].join(','));
+
+    // Data
+    const resultRows = document.querySelectorAll('#resultsBody tr');
+    resultRows.forEach(row => {
+        const cells = row.querySelectorAll('td');
+        const data = [
+            cells[0].textContent.trim(),
+            cells[1].textContent.trim(),
+            cells[2].text.trim(),
+            cells[3].text.trim()
+        ];
+        // Quote CSV fields properly
+        const quoted = data.map(d => `"${d.replace(/"/g, '""')}"`);
+        rows.push(quoted.join(','));
+    });
+
+    const csvContent = rows.join('\\n');
+    const blob = new Blob([csvContent], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'pdd-keywords.csv';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+
+    showToast('CSV导出成功');
+});
+    </script>
+</body>
+</html>
+```
+
+- [ ] **Step 2: Commit**
+
+```bash
+git add tools/pdd-keyword-miner/index.html
+git commit -m "feat: add Pinduoduo keyword miner full implementation"
+```
+
+---
+
+### Task 2: Add README and update root index
+
+**Files:**
+- Create: `tools/pdd-keyword-miner/README.md`
+- Modify: `index.html`
+
+- [ ] **Step 1: Create README**
+
+```markdown
+# 拼多多选品关键词挖掘工具
+
+输入核心词，批量扩展相关关键词，分析竞争度，帮拼多多卖家找蓝海词。
+
+## 功能特点
+
+- 支持输入多个核心词批量扩展
+- 支持多级扩展（1-3级）
+- 自动计算竞争度（搜索人数/商品数）
+- 按蓝海度排序，颜色标注等级
+- 支持导出CSV格式方便进一步筛选
+- 纯前端工具，无需后端
+
+## 使用方法
+
+1. 每行输入一个核心词
+2. 选择扩展深度（1-3级）
+3. 点击开始扩展
+4. 查看结果，按竞争度排序
+5. 导出CSV到Excel进一步筛选
+
+## 说明
+
+MVP版本：
+- 关键词竞争数据为模拟估算，用于演示框架
+- 完整版可对接拼多多API获取真实数据
+
+## 技术
+
+- 纯前端HTML + JavaScript
+- Tailwind CSS via CDN
+```
+
+- [ ] **Step 2: Update root index.html add card**
+
+- [ ] **Step 3: Commit**
+
+```bash
+git add tools/pdd-keyword-miner/README.md index.html
+git commit -m "docs: add readme and update root index for pdd keyword miner"
+```
+
+---
+
+## Acceptance Criteria
+
+1. Page loads correctly
+2. Can input multiple core keywords
+3. Can select expansion depth
+4. Expands keywords correctly, removes duplicates
+5. Displays results table with competition color coding
+6. Export CSV works
+7. Responsive layout
+
+Total estimated development time: **1 day**

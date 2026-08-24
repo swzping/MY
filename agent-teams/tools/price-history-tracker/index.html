@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>网购历史价格追踪 - 降价提醒</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <div class="container mx-auto px-4 py-8 max-w-5xl">
+        <header class="text-center mb-8">
+            <h1 class="text-4xl font-bold text-gray-800 mb-2">网购历史价格追踪</h1>
+            <p class="text-gray-600">记录商品价格，降价一目了然</p>
+        </header>
+
+        <!-- Add Product Form -->
+        <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+            <h2 class="text-xl font-semibold text-gray-800 mb-4">添加/更新商品</h2>
+
+            <div class="grid md:grid-cols-2 gap-4">
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">商品名称</label>
+                    <input type="text" id="productName" placeholder="输入商品名称"
+                           class="w-full px-4 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">当前价格</label>
+                    <input type="number" id="currentPrice" placeholder="例如：199.00" step="0.01"
+                           class="w-full px-4 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+            </div>
+
+            <div class="grid md:grid-cols-2 gap-4">
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">商品链接 (可选)</label>
+                    <input type="url" id="productUrl" placeholder="https://..."
+                           class="w-full px-4 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">平台</label>
+                    <select id="platform" class="w-full px-4 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <option value="taobao">淘宝</option>
+                        <option value="jd">京东</option>
+                        <option value="pdd">拼多多</option>
+                        <option value="other">其他</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="mb-4">
+                <label class="block text-sm font-medium text-gray-700 mb-2">目标价格 (低于此价提醒)</label>
+                <input type="number" id="targetPrice" placeholder="留空不设置提醒" step="0.01"
+                       class="w-full px-4 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+            </div>
+
+            <div class="text-center">
+                <button id="addUpdateBtn"
+                        class="bg-green-600 hover:bg-green-700 text-white font-medium px-6 py-2 rounded-md transition-colors">
+                    添加/更新价格
+                </button>
+            </div>
+        </div>
+
+        <!-- Products List -->
+        <div id="productsContainer" class="hidden">
+            <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+                <h2 class="text-xl font-semibold text-gray-800 mb-4">我的追踪列表</h2>
+                <div id="productsList" class="space-y-4">
+                </div>
+            </div>
+        </div>
+
+        <!-- Selected Product Chart -->
+        <div id="chartContainer" class="bg-white rounded-lg shadow-md p-6 mb-6 hidden">
+            <h2 class="text-xl font-semibold text-gray-800 mb-4" id="chartTitle"></h2>
+            <div class="h-80">
+                <canvas id="priceChart"></canvas>
+            </div>
+        </div>
+
+        <footer class="mt-8 text-center text-gray-500 text-sm">
+            <p>© 2026 工具集 · 小而美，解决真问题</p>
+        </footer>
+
+        <!-- Toast -->
+        <div id="toast" class="fixed bottom-6 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white px-6 py-3 rounded-lg opacity-0 transition-opacity duration-300 hidden"></div>
+    </div>
+
+    <script src="../../shared/utils.js"></script>
+    <script>
+// State
+let products = [];
+let currentChart = null;
+let selectedProductId = null;
+
+// DOM Elements
+const productNameInput = document.getElementById('productName');
+const currentPriceInput = document.getElementById('currentPrice');
+const productUrlInput = document.getElementById('productUrl');
+const platformSelect = document.getElementById('platform');
+const targetPriceInput = document.getElementById('targetPrice');
+const addUpdateBtn = document.getElementById('addUpdateBtn');
+const productsContainer = document.getElementById('productsContainer');
+const productsList = document.getElementById('productsList');
+const chartContainer = document.getElementById('chartContainer');
+const chartTitle = document.getElementById('chartTitle');
+const priceChartCanvas = document.getElementById('priceChart');
+
+// Load saved data
+document.addEventListener('DOMContentLoaded', () => {
+    const saved = getFromLocalStorage('price_tracker_data', '');
+    if (saved) {
+        try {
+            products = JSON.parse(saved);
+            renderProducts();
+            if (products.length > 0) {
+                productsContainer.classList.remove('hidden');
+            }
+        } catch (e) {
+            console.error('Failed to load saved data');
+        }
+    }
+});
+
+// Add or Update product
+addUpdateBtn.addEventListener('click', () => {
+    const productName = productNameInput.value.trim();
+    const currentPrice = parseFloat(currentPriceInput.value);
+
+    if (!productName) {
+        showToast('请输入商品名称');
+        return;
+    }
+    if (isNaN(currentPrice) || currentPrice <= 0) {
+        showToast('请输入正确的当前价格');
+        return;
+    }
+
+    const platform = platformSelect.value;
+    const productUrl = productUrlInput.value.trim();
+    const targetPrice = targetPriceInput.value ? parseFloat(targetPriceInput.value) : null;
+
+    // Check if product already exists (by name)
+    let existingProduct = products.find(p =>
+        p.name.toLowerCase() === productName.toLowerCase()
+    );
+
+    const priceRecord = {
+        date: new Date().toISOString().split('T')[0],
+        timestamp: Date.now(),
+        price: currentPrice
+    };
+
+    if (existingProduct) {
+        // Add new price record
+        existingProduct.priceHistory.push(priceRecord);
+        existingProduct.targetPrice = targetPrice;
+        existingProduct.url = productUrl;
+        existingProduct.platform = platform;
+        // Sort by date
+        existingProduct.priceHistory.sort((a, b) => a.timestamp - b.timestamp);
+        saveData();
+        renderProducts();
+        showToast('价格已更新');
+    } else {
+        // New product
+        const newProduct = {
+            id: Date.now(),
+            name: productName,
+            url: productUrl,
+            platform: platform,
+            targetPrice: targetPrice,
+            priceHistory: [priceRecord]
+        };
+        products.push(newProduct);
+        saveData();
+        renderProducts();
+        showToast('商品已添加');
+    }
+
+    productsContainer.classList.remove('hidden');
+    // Clear form - keep name for convenience if updating same product
+    currentPriceInput.value = '';
+});
+
+function saveData() {
+    saveToLocalStorage('price_tracker_data', products);
+}
+
+function getPlatformBadgeClass(platform) {
+    switch (platform) {
+        case 'taobao': return 'bg-orange-100 text-orange-800';
+        case 'jd': return 'bg-red-100 text-red-800';
+        case 'pdd': return 'bg-yellow-100 text-yellow-800';
+        default: return 'bg-gray-100 text-gray-800';
+    }
+}
+
+function getPlatformName(platform) {
+    switch (platform) {
+        case 'taobao': return '淘宝';
+        case 'jd': return '京东';
+        case 'pdd': return '拼多多';
+        default: return '其他';
+    }
+}
+
+function renderProducts() {
+    productsList.innerHTML = '';
+
+    products.forEach(product => {
+        const history = product.priceHistory;
+        const latest = history[history.length - 1];
+        const lowest = history.reduce((min, p) => p.price < min ? p.price : min, history[0].price);
+        const highest = history.reduce((max, p) => p.price > max ? p.price : max, history[0].price);
+
+        const isBelowTarget = product.targetPrice && latest.price <= product.targetPrice;
+
+        const div = document.createElement('div');
+        div.className = `border rounded-lg p-4 ${selectedProductId === product.id ? 'border-blue-500 bg-blue-50' : 'border-gray-200'}`;
+
+        div.innerHTML = `
+            <div class="flex items-start justify-between">
+                <div class="flex-1">
+                    <div class="flex items-center gap-2 mb-2">
+                        <h3 class="text-lg font-semibold text-gray-800">${product.name}</h3>
+                        <span class="px-2 py-0.5 rounded-full text-xs ${getPlatformBadgeClass(product.platform)}">${getPlatformName(product.platform)}</span>
+                        ${isBelowTarget ? '<span class="px-2 py-0.5 bg-green-100 text-green-800 rounded-full text-xs">已达目标价</span>' : ''}
+                    </div>
+                    <div class="flex flex-wrap gap-4 text-sm text-gray-600">
+                        <span>当前: <strong class="text-gray-800">¥${latest.price.toFixed(2)}</strong></span>
+                        <span>最低: <strong class="text-green-600">¥${lowest.toFixed(2)}</strong></span>
+                        <span>最高: ¥${highest.toFixed(2)}</span>
+                        ${product.targetPrice ? `<span>目标: ≤¥${product.targetPrice.toFixed(2)}</span>` : ''}
+                        <span>记录: ${history.length}条</span>
+                    </div>
+                </div>
+                <div class="flex gap-2 ml-4">
+                    <button data-id="${product.id}" class="view-btn px-3 py-1 bg-blue-600 hover:bg-blue-700 text-white rounded text-sm transition-colors">查看走势</button>
+                    <button data-id="${product.id}" class="delete-btn px-3 py-1 bg-red-600 hover:bg-red-700 text-white rounded text-sm transition-colors">删除</button>
+                </div>
+            </div>
+            ${product.url ? `<div class="mt-2"><a href="${product.url}" target="_blank" rel="noopener noreferrer" class="text-blue-600 hover:text-blue-800 text-sm">打开商品链接 →</a></div>` : ''}
+        `;
+
+        div.querySelector('.view-btn').addEventListener('click', () => {
+            selectedProductId = product.id;
+            renderPriceChart(product);
+            renderProducts();
+        });
+
+        div.querySelector('.delete-btn').addEventListener('click', () => {
+            if (confirm('确认删除这个商品？所有价格记录都会被删除。')) {
+                products = products.filter(p => p.id !== product.id);
+                if (selectedProductId === product.id) {
+                    selectedProductId = null;
+                    chartContainer.classList.add('hidden');
+                    if (currentChart) {
+                        currentChart.destroy();
+                        currentChart = null;
+                    }
+                }
+                saveData();
+                renderProducts();
+                if (products.length === 0) {
+                    productsContainer.classList.add('hidden');
+                }
+                showToast('已删除');
+            }
+        });
+
+        productsList.appendChild(div);
+    });
+}
+
+function renderPriceChart(product) {
+    const history = product.priceHistory;
+
+    const labels = history.map(h => h.date);
+    const data = history.map(h => h.price);
+
+    const minPrice = Math.min(...data);
+    const maxPrice = Math.max(...data);
+    const padding = (maxPrice - minPrice) * 0.1;
+
+    if (currentChart) {
+        currentChart.destroy();
+    }
+
+    chartContainer.classList.remove('hidden');
+    chartTitle.textContent = `${product.name} - 价格走势`;
+
+    const ctx = priceChartCanvas.getContext('2d');
+    currentChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: '价格',
+                data: data,
+                borderColor: 'rgb(59, 130, 246)',
+                backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                borderWidth: 2,
+                fill: true,
+                tension: 0.1
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: {
+                    beginAtZero: false,
+                    min: Math.max(0, minPrice - padding),
+                    ticks: {
+                        callback: function(value) {
+                            return '¥' + value.toFixed(2);
+                        }
+                    }
+                }
+            },
+            plugins: {
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            return '价格: ¥' + context.parsed.y.toFixed(2);
+                        }
+                    }
+                }
+            }
+        }
+    });
+}
+    </script>
+</body>
+</html>

@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+log_file="${HOME}/.codex/bright-path-session-start.log"
+timestamp="$(date '+%Y-%m-%d %H:%M:%S %z')"
+printf '[%s] Bright Path SessionStart hook executed\n' "$timestamp" >> "$log_file"
+
+context="Bright Path 已启用。若这是本会话的第一条助理回复，请先用单独一行显示：Bright Path 已启用。它适合整理想法、制定下一步计划、复盘进展、辅助决策、润色表达；当用户明确提到 IMA Copilot、IMA 知识库或需要查询个人知识库时，可使用 ima-copilot 技能，并优先检查本机 MCP 服务 http://127.0.0.1:8081/mcp 是否可用；当用户提到 SW、本地知识库、股票资料或项目资料时，可使用 sw-knowledge 技能检索 /Users/edy/Documents/SW；当用户提到网络博主、内容创作、选题、口播、小红书、公众号、发布复盘时，可使用 creator-workflow 及其子技能。保持中文、温和、务实、具体，最多给出三个立即可做的下一步。"
+
+escape_for_json() {
+  local s="$1"
+  s="${s//\\/\\\\}"
+  s="${s//\"/\\\"}"
+  s="${s//$'\n'/\\n}"
+  s="${s//$'\r'/\\r}"
+  s="${s//$'\t'/\\t}"
+  printf '%s' "$s"
+}
+
+escaped_context="$(escape_for_json "$context")"
+printf '{\n  "additionalContext": "%s"\n}\n' "$escaped_context"

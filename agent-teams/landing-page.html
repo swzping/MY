@@ -1,0 +1,620 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>职场妈妈时间管理咨询 - 找回工作与生活的平衡</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+            line-height: 1.6;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        /* Header */
+        header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 80px 0;
+            text-align: center;
+        }
+
+        header h1 {
+            font-size: 2.5em;
+            margin-bottom: 20px;
+            font-weight: 700;
+        }
+
+        header p {
+            font-size: 1.3em;
+            margin-bottom: 30px;
+            opacity: 0.95;
+        }
+
+        .cta-button {
+            display: inline-block;
+            background: white;
+            color: #667eea;
+            padding: 15px 40px;
+            border-radius: 30px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 1.1em;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .cta-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+        }
+
+        /* Sections */
+        section {
+            padding: 60px 0;
+        }
+
+        section h2 {
+            font-size: 2em;
+            margin-bottom: 30px;
+            text-align: center;
+            color: #2d3748;
+        }
+
+        /* Pain Points */
+        .pain-points {
+            background: #f7fafc;
+        }
+
+        .pain-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 30px;
+            margin-top: 40px;
+        }
+
+        .pain-card {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .pain-card h3 {
+            color: #e53e3e;
+            margin-bottom: 15px;
+            font-size: 1.3em;
+        }
+
+        /* Solution */
+        .solution {
+            background: white;
+        }
+
+        .solution-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 30px;
+            margin-top: 40px;
+        }
+
+        .solution-card {
+            padding: 30px;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            transition: border-color 0.3s;
+        }
+
+        .solution-card:hover {
+            border-color: #667eea;
+        }
+
+        .solution-card h3 {
+            color: #667eea;
+            margin-bottom: 15px;
+            font-size: 1.3em;
+        }
+
+        /* Market Data */
+        .market-data {
+            background: #edf2f7;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 30px;
+            margin-top: 40px;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            text-align: center;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .stat-number {
+            font-size: 2.5em;
+            font-weight: 700;
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+
+        .stat-label {
+            color: #718096;
+            font-size: 1em;
+        }
+
+        /* Pricing */
+        .pricing {
+            background: white;
+        }
+
+        .pricing-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 30px;
+            margin-top: 40px;
+        }
+
+        .pricing-card {
+            background: white;
+            border: 2px solid #e2e8f0;
+            border-radius: 15px;
+            padding: 40px;
+            text-align: center;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .pricing-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.15);
+        }
+
+        .pricing-card.featured {
+            border-color: #667eea;
+            border-width: 3px;
+            position: relative;
+        }
+
+        .featured-badge {
+            position: absolute;
+            top: -15px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #667eea;
+            color: white;
+            padding: 5px 20px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            font-weight: 600;
+        }
+
+        .pricing-card h3 {
+            font-size: 1.5em;
+            margin-bottom: 20px;
+            color: #2d3748;
+        }
+
+        .price {
+            font-size: 2.5em;
+            font-weight: 700;
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+
+        .price-period {
+            color: #718096;
+            font-size: 0.9em;
+            margin-bottom: 30px;
+        }
+
+        .features-list {
+            list-style: none;
+            margin-bottom: 30px;
+            text-align: left;
+        }
+
+        .features-list li {
+            padding: 10px 0;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .features-list li:before {
+            content: "✓ ";
+            color: #48bb78;
+            font-weight: bold;
+            margin-right: 10px;
+        }
+
+        /* Budget */
+        .budget {
+            background: #f7fafc;
+        }
+
+        .budget-breakdown {
+            max-width: 800px;
+            margin: 40px auto;
+            background: white;
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .budget-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 15px 0;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .budget-item:last-child {
+            border-bottom: none;
+            font-weight: 700;
+            font-size: 1.2em;
+            color: #667eea;
+        }
+
+        /* Roadmap */
+        .roadmap {
+            background: white;
+        }
+
+        .timeline {
+            max-width: 900px;
+            margin: 40px auto;
+        }
+
+        .timeline-item {
+            display: flex;
+            margin-bottom: 40px;
+            position: relative;
+        }
+
+        .timeline-marker {
+            flex-shrink: 0;
+            width: 60px;
+            height: 60px;
+            background: #667eea;
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 1.2em;
+            margin-right: 30px;
+        }
+
+        .timeline-content {
+            flex-grow: 1;
+            background: #f7fafc;
+            padding: 25px;
+            border-radius: 10px;
+        }
+
+        .timeline-content h3 {
+            color: #2d3748;
+            margin-bottom: 15px;
+            font-size: 1.3em;
+        }
+
+        .timeline-content ul {
+            margin-left: 20px;
+        }
+
+        .timeline-content li {
+            margin-bottom: 8px;
+        }
+
+        /* CTA Section */
+        .cta-section {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            text-align: center;
+            padding: 80px 0;
+        }
+
+        .cta-section h2 {
+            color: white;
+            font-size: 2.5em;
+            margin-bottom: 20px;
+        }
+
+        .cta-section p {
+            font-size: 1.2em;
+            margin-bottom: 30px;
+            opacity: 0.95;
+        }
+
+        .contact-info {
+            background: rgba(255,255,255,0.1);
+            padding: 30px;
+            border-radius: 10px;
+            display: inline-block;
+            margin-top: 20px;
+        }
+
+        .contact-info p {
+            font-size: 1.1em;
+            margin: 10px 0;
+        }
+
+        /* Footer */
+        footer {
+            background: #2d3748;
+            color: white;
+            text-align: center;
+            padding: 30px 0;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            header h1 {
+                font-size: 1.8em;
+            }
+
+            header p {
+                font-size: 1.1em;
+            }
+
+            section h2 {
+                font-size: 1.5em;
+            }
+
+            .timeline-item {
+                flex-direction: column;
+            }
+
+            .timeline-marker {
+                margin-bottom: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <div class="container">
+            <h1>职场妈妈时间管理咨询</h1>
+            <p>找回工作与生活的平衡，成为更好的自己</p>
+            <a href="#contact" class="cta-button">立即预约咨询</a>
+        </div>
+    </header>
+
+    <!-- Pain Points -->
+    <section class="pain-points">
+        <div class="container">
+            <h2>你是否正在经历这些困扰？</h2>
+            <div class="pain-grid">
+                <div class="pain-card">
+                    <h3>时间永远不够用</h3>
+                    <p>工作、带娃、家务，每天像陀螺一样转个不停，却总觉得什么都没做好</p>
+                </div>
+                <div class="pain-card">
+                    <h3>内疚感如影随形</h3>
+                    <p>加班时担心孩子，陪孩子时惦记工作，总觉得亏欠了某一方</p>
+                </div>
+                <div class="pain-card">
+                    <h3>身心俱疲</h3>
+                    <p>长期高压状态，睡眠不足，没有自己的时间，感觉快要崩溃</p>
+                </div>
+                <div class="pain-card">
+                    <h3>职业发展受限</h3>
+                    <p>想要晋升却分身乏术，眼看同事超越自己，焦虑却无力改变</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Solution -->
+    <section class="solution">
+        <div class="container">
+            <h2>我们的解决方案</h2>
+            <div class="solution-grid">
+                <div class="solution-card">
+                    <h3>个性化时间诊断</h3>
+                    <p>深入分析你的时间使用现状，找出时间黑洞和效率瓶颈，制定专属优化方案</p>
+                </div>
+                <div class="solution-card">
+                    <h3>科学时间管理体系</h3>
+                    <p>结合GTD、番茄工作法等经典方法，打造适合职场妈妈的时间管理系统</p>
+                </div>
+                <div class="solution-card">
+                    <h3>工作家庭平衡策略</h3>
+                    <p>教你如何设定边界、合理分配精力，在工作和家庭间找到最佳平衡点</p>
+                </div>
+                <div class="solution-card">
+                    <h3>持续陪伴式指导</h3>
+                    <p>不是一次性咨询，而是长期陪伴，帮你养成习惯，真正改变生活状态</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Market Data -->
+    <section class="market-data">
+        <div class="container">
+            <h2>市场数据支持</h2>
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-number">3000万+</div>
+                    <div class="stat-label">中国职场妈妈数量</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">800亿</div>
+                    <div class="stat-label">知识付费市场规模</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">78%</div>
+                    <div class="stat-label">职场妈妈感到时间压力</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">92%</div>
+                    <div class="stat-label">愿意为解决方案付费</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Pricing -->
+    <section class="pricing">
+        <div class="container">
+            <h2>服务套餐</h2>
+            <div class="pricing-grid">
+                <div class="pricing-card">
+                    <h3>体验咨询</h3>
+                    <div class="price">¥99</div>
+                    <div class="price-period">30分钟 1对1咨询</div>
+                    <ul class="features-list">
+                        <li>时间使用现状诊断</li>
+                        <li>核心问题识别</li>
+                        <li>初步改善建议</li>
+                        <li>适合人群评估</li>
+                    </ul>
+                    <a href="#contact" class="cta-button">立即预约</a>
+                </div>
+
+                <div class="pricing-card featured">
+                    <div class="featured-badge">最受欢迎</div>
+                    <h3>系统课程</h3>
+                    <div class="price">¥599</div>
+                    <div class="price-period">录播课程 + 社群支持</div>
+                    <ul class="features-list">
+                        <li>8节系统课程（共4小时）</li>
+                        <li>配套工具包和模板</li>
+                        <li>90天社群答疑</li>
+                        <li>每周直播答疑</li>
+                        <li>学员案例库访问</li>
+                    </ul>
+                    <a href="#contact" class="cta-button">立即购买</a>
+                </div>
+
+                <div class="pricing-card">
+                    <h3>深度陪伴</h3>
+                    <div class="price">¥1999</div>
+                    <div class="price-period">3个月 1对1指导</div>
+                    <ul class="features-list">
+                        <li>包含系统课程全部内容</li>
+                        <li>每周1次1对1咨询（共12次）</li>
+                        <li>个性化方案定制</li>
+                        <li>24小时微信答疑</li>
+                        <li>习惯养成跟踪</li>
+                        <li>终身社群会员</li>
+                    </ul>
+                    <a href="#contact" class="cta-button">咨询详情</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Budget -->
+    <section class="budget">
+        <div class="container">
+            <h2>启动预算分配（¥1000）</h2>
+            <div class="budget-breakdown">
+                <div class="budget-item">
+                    <span>域名 + 企业微信</span>
+                    <span>¥300</span>
+                </div>
+                <div class="budget-item">
+                    <span>小红书/抖音投流测试</span>
+                    <span>¥400</span>
+                </div>
+                <div class="budget-item">
+                    <span>课程制作工具（剪映专业版）</span>
+                    <span>¥200</span>
+                </div>
+                <div class="budget-item">
+                    <span>学习对标账号付费内容</span>
+                    <span>¥100</span>
+                </div>
+                <div class="budget-item">
+                    <span>总计</span>
+                    <span>¥1000</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Roadmap -->
+    <section class="roadmap">
+        <div class="container">
+            <h2>90天启动路线图</h2>
+            <div class="timeline">
+                <div class="timeline-item">
+                    <div class="timeline-marker">月1</div>
+                    <div class="timeline-content">
+                        <h3>内容冷启动</h3>
+                        <ul>
+                            <li>小红书发布15篇图文（时间管理干货）</li>
+                            <li>抖音发布20条短视频（场景化痛点）</li>
+                            <li>目标：涨粉500+，私域导流50人</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="timeline-item">
+                    <div class="timeline-marker">月2</div>
+                    <div class="timeline-content">
+                        <h3>产品验证</h3>
+                        <ul>
+                            <li>推出¥99体验课（1对1咨询30分钟）</li>
+                            <li>目标：成交10单，收集反馈</li>
+                            <li>迭代标准化服务流程</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="timeline-item">
+                    <div class="timeline-marker">月3</div>
+                    <div class="timeline-content">
+                        <h3>规模化测试</h3>
+                        <ul>
+                            <li>推出¥599系统课程（录播+社群）</li>
+                            <li>小额投流（¥200测试ROI）</li>
+                            <li>目标：月收入¥3000+，验证可行性</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA -->
+    <section class="cta-section" id="contact">
+        <div class="container">
+            <h2>准备好改变了吗？</h2>
+            <p>让我们一起找回工作与生活的平衡</p>
+            <a href="#" class="cta-button">立即预约免费咨询</a>
+
+            <div class="contact-info">
+                <p><strong>联系方式</strong></p>
+                <p>微信：WorkingMomTime</p>
+                <p>小红书：@职场妈妈时间管理</p>
+                <p>邮箱：contact@workingmomtime.com</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <p>&copy; 2026 职场妈妈时间管理咨询. 用千元启动，改变千万职场妈妈的生活.</p>
+        </div>
+    </footer>
+</body>
+</html>

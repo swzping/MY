@@ -1,0 +1,71 @@
+{
+  "name": "shouwang",
+  "version": "0.1.0",
+  "description": "守望智能体桌面工作台",
+  "main": "dist-electron/electron/main.js",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "npm run dev:electron",
+    "dev:renderer": "vite --host 127.0.0.1",
+    "dev:electron": "concurrently -k \"npm:dev:renderer\" \"npm:dev:electron:main\"",
+    "dev:electron:main": "wait-on tcp:127.0.0.1:5173 && tsc -p tsconfig.electron.json && cp electron/preload.cjs dist-electron/electron/preload.cjs && VITE_DEV_SERVER_URL=http://127.0.0.1:5173 electron .",
+    "build": "tsc -p tsconfig.json && tsc -p tsconfig.electron.json && cp electron/preload.cjs dist-electron/electron/preload.cjs && vite build",
+    "preview": "vite preview --host 127.0.0.1",
+    "pack": "npm run build && electron-builder --dir",
+    "dist": "npm run build && electron-builder"
+  },
+  "keywords": [
+    "electron",
+    "react",
+    "agent",
+    "desktop"
+  ],
+  "author": "",
+  "license": "UNLICENSED",
+  "dependencies": {
+    "clsx": "^2.1.1",
+    "lucide-react": "^1.17.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "xlsx": "^0.18.5"
+  },
+  "devDependencies": {
+    "@types/react": "^18.3.12",
+    "@types/react-dom": "^18.3.1",
+    "@vitejs/plugin-react": "^4.3.4",
+    "concurrently": "^9.2.1",
+    "cross-env": "^7.0.3",
+    "electron": "30.5.1",
+    "electron-builder": "24.13.3",
+    "typescript": "^5.9.3",
+    "vite": "^5.4.21",
+    "wait-on": "^8.0.5"
+  },
+  "build": {
+    "appId": "com.shouwang.agent",
+    "productName": "守望智能体",
+    "directories": {
+      "output": "release"
+    },
+    "files": [
+      "dist/**/*",
+      "dist-electron/**/*",
+      "package.json"
+    ],
+    "mac": {
+      "target": [
+        "dmg",
+        "zip"
+      ],
+      "category": "public.app-category.business"
+    },
+    "win": {
+      "target": "nsis"
+    },
+    "linux": {
+      "target": "AppImage",
+      "category": "Office"
+    }
+  }
+}

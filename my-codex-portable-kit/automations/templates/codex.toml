@@ -1,0 +1,11 @@
+version = 1
+id = "codex"
+kind = "cron"
+name = "整理新增 Codex 插件和技能 改成每天18:00运行"
+prompt = "检查本机 Codex 和 Agent 配置中是否有新增 skills 或第三方 plugins：对比 ~/.codex/skills、~/.codex/plugins/cache、~/.agents/skills、~/.agents/plugins 与 /Users/edy/Documents/MY/my-codex-portable-kit 中已沉淀的内容。以后只更新 /Users/edy/Documents/MY/my-codex-portable-kit 这个新目录，不再写入旧的 outputs/my-codex-portable-kit，也不需要生成或更新 my-codex-portable-kit.zip。如果发现新增插件或技能，将其整理进 portable kit，更新 README.md、CAPABILITIES.md、instructions.md、install.sh 或相关说明；最后汇报新增内容、更新文件和验证结果。Agent 迁移应包含可复用 skill/plugin/marketplace 文件，但不要迁移运行数据、报告、.git、.mootdx、__pycache__、临时文件或机器状态。不要迁移 auth.json、API key、token、sqlite、history、sessions、日志、临时文件或机器专属路径。"
+status = "PAUSED"
+rrule = "FREQ=DAILY;BYHOUR=18;BYMINUTE=0;BYSECOND=0"
+model = "gpt-5.5"
+reasoning_effort = "medium"
+execution_environment = "local"
+cwds = ["/Users/edy/Documents/MY/my-codex-portable-kit"]
