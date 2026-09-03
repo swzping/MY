@@ -4,6 +4,7 @@ import {StyleSheet, Text, View} from 'react-native';
 import {colors} from '@app/styles/theme';
 
 const inactiveColor = '#5F665F';
+const activeColor = '#B77905';
 
 const HomeMark = ({color}) => (
   <View style={styles.homeWrap}>
@@ -59,7 +60,7 @@ const marks = {
 };
 
 const TabBarIcon = ({name, focused, badge}) => {
-  const color = focused ? colors.primary : inactiveColor;
+  const color = focused ? activeColor : inactiveColor;
   const Mark = marks[name] || HomeMark;
   const normalizedBadge = Number(badge || 0);
 
@@ -87,7 +88,7 @@ const styles = StyleSheet.create({
     width: 42,
   },
   activeContainer: {
-    backgroundColor: '#EAF5EF',
+    backgroundColor: '#FFF1CC',
   },
   badge: {
     alignItems: 'center',

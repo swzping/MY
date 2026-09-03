@@ -15,6 +15,7 @@ import AccountScreen from '@app/features/account/AccountScreen';
 
 const Tab = createBottomTabNavigator();
 
+const activeColor = '#B77905';
 const inactiveColor = '#5F665F';
 
 const renderLabel = label => ({focused}) => (
@@ -42,7 +43,7 @@ const AppTabs = () => {
     <Tab.Navigator
       screenOptions={{
         headerShown: false,
-        tabBarActiveTintColor: colors.primary,
+        tabBarActiveTintColor: activeColor,
         tabBarHideOnKeyboard: true,
         tabBarIconStyle: styles.iconSlot,
         tabBarInactiveTintColor: inactiveColor,
@@ -107,7 +108,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   activeLabel: {
-    color: colors.primary,
+    color: activeColor,
   },
   inactiveLabel: {
     color: inactiveColor,
