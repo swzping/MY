@@ -142,6 +142,12 @@ yarn test --runInBand
 - `src/core/helpers/cartLogic.js`：购物车和优惠券的纯业务逻辑。
 - `src/override/features/home/HomeScreen.js`：可见的 override 覆盖示例。
 
+## 学习指南文档
+
+- `docs/original-project-learning-map.md`：说明原项目的技术模块，在当前学习项目中如何体现、如何学习。
+- `docs/project-analysis.md`：原项目技术点与特色功能总结。
+- `docs/learning-guide.md`：建议阅读顺序、练习题和常用命令。
+
 ## 建议体验顺序
 
 1. 使用 mock 用户登录。
