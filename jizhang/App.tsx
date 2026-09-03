@@ -3,6 +3,8 @@ import * as SplashScreen from "expo-splash-screen";
 import {
   BarChart3,
   CalendarDays,
+  ChevronLeft,
+  ChevronRight,
   Home,
   LineChart,
   ListPlus,
@@ -36,8 +38,11 @@ import {
   getBudgetStatus,
   getCategoryBudgetStatuses,
   getCategorySpending,
+  getLatestRecordDate,
   getMonthlyTotals,
+  getMonthlyReport,
   getRecentRecords,
+  getYearlyReport,
   validateRecordInput,
 } from "./src/lib/analytics";
 import { loadAppData, saveAppData } from "./src/lib/storage";
@@ -553,56 +558,200 @@ function BudgetScreen({
 }
 
 function AnalysisScreen({ metrics, records }: { metrics: Metrics; records: Transaction[] }) {
-  const maxTrend = Math.max(...metrics.trend.map((item) => item.amount), 1);
+  const latestDate = getLatestRecordDate(records);
+  const [reportMode, setReportMode] = useState<"month" | "year">("month");
+  const [selectedMonth, setSelectedMonth] = useState(latestDate.slice(0, 7));
+  const [selectedYear, setSelectedYear] = useState(latestDate.slice(0, 4));
+  const monthlyReport = useMemo(() => getMonthlyReport(records, selectedMonth), [records, selectedMonth]);
+  const yearlyReport = useMemo(() => getYearlyReport(records, selectedYear), [records, selectedYear]);
+  const activeReport = reportMode === "month" ? monthlyReport : yearlyReport;
+
+  useEffect(() => {
+    setSelectedMonth(latestDate.slice(0, 7));
+    setSelectedYear(latestDate.slice(0, 4));
+  }, [latestDate]);
 
   return (
     <View style={styles.stack}>
-      <View style={styles.metricGrid}>
-        <MetricCard label="收入" value={formatMoney(metrics.totals.income)} />
-        <MetricCard label="支出" value={formatMoney(metrics.totals.expense)} />
+      <View style={styles.segmented}>
+        <SegmentButton active={reportMode === "month"} label="月度" onPress={() => setReportMode("month")} />
+        <SegmentButton active={reportMode === "year"} label="年度" onPress={() => setReportMode("year")} />
       </View>
 
-      <View style={styles.panel}>
-        <SectionHeader icon={<LineChart color="#16805f" size={18} />} title="近 7 天支出" />
-        <View style={styles.trendChart}>
-          {metrics.trend.map((point) => (
-            <View key={point.date} style={styles.trendColumn}>
-              <Text style={styles.trendValue}>{point.amount > 0 ? `¥${Math.round(point.amount)}` : ""}</Text>
-              <View style={styles.trendTrack}>
-                <View style={[styles.trendBar, { height: `${Math.max(5, (point.amount / maxTrend) * 100)}%` }]} />
-              </View>
-              <Text style={styles.trendLabel}>{point.label.slice(3)}</Text>
-            </View>
-          ))}
-        </View>
-      </View>
+      {reportMode === "month" ? (
+        <PeriodSwitcher
+          label={formatMonthLabel(selectedMonth)}
+          onPrevious={() => setSelectedMonth(shiftMonth(selectedMonth, -1))}
+          onNext={() => setSelectedMonth(shiftMonth(selectedMonth, 1))}
+        />
+      ) : (
+        <PeriodSwitcher
+          label={`${selectedYear} 年`}
+          onPrevious={() => setSelectedYear(String(Number(selectedYear) - 1))}
+          onNext={() => setSelectedYear(String(Number(selectedYear) + 1))}
+        />
+      )}
+
+      <ReportMetricGrid totals={activeReport.totals} />
 
       <View style={styles.panel}>
-        <SectionHeader icon={<BarChart3 color="#16805f" size={18} />} title="分类占比" />
-        {metrics.categories.length === 0 ? (
-          <Text style={styles.emptyText}>本月还没有支出记录</Text>
+        <SectionHeader icon={<LineChart color="#16805f" size={18} />} title={reportMode === "month" ? "每日支出" : "全年收支"} />
+        {reportMode === "month" ? (
+          <MonthlyTrendChart points={monthlyReport.dailyTrend} />
         ) : (
-          <View style={styles.stackSmall}>
-            {metrics.categories.map((item) => (
-              <View key={item.category} style={styles.categoryRow}>
-                <View style={styles.rowBetween}>
-                  <Text style={styles.itemTitle}>{labelFor(item.category)}</Text>
-                  <Text style={styles.muted}>{item.percent}%</Text>
-                </View>
-                <ProgressBar level="healthy" percent={item.percent} />
-                <Text style={styles.categoryAmount}>{formatMoney(item.amount)}</Text>
-              </View>
-            ))}
-          </View>
+          <YearlyTrendChart summaries={yearlyReport.monthlySummaries} />
         )}
       </View>
 
       <View style={styles.panel}>
-        <SectionHeader icon={<ReceiptText color="#16805f" size={18} />} title="全部账单" />
+        <SectionHeader icon={<BarChart3 color="#16805f" size={18} />} title="分类排行" />
+        <CategoryRanking categories={activeReport.categories} />
+      </View>
+
+      {reportMode === "year" && (
+        <View style={styles.panel}>
+          <SectionHeader icon={<CalendarDays color="#16805f" size={18} />} title="高支出月份" />
+          <TopExpenseMonths months={yearlyReport.topExpenseMonths} />
+        </View>
+      )}
+
+      {reportMode === "month" && (
+        <View style={styles.panel}>
+          <SectionHeader icon={<ReceiptText color="#16805f" size={18} />} title="本月账单" />
+          {monthlyReport.records.length === 0 ? (
+            <Text style={styles.emptyText}>这个月还没有账单记录</Text>
+          ) : (
+            <TransactionList records={monthlyReport.records} />
+          )}
+        </View>
+      )}
+
+      <View style={styles.panel}>
+        <SectionHeader icon={<ReceiptText color="#16805f" size={18} />} title="最近账单" />
         <TransactionList records={getRecentRecords(records, 20)} />
       </View>
     </View>
   );
+}
+
+function PeriodSwitcher({ label, onPrevious, onNext }: { label: string; onPrevious: () => void; onNext: () => void }) {
+  return (
+    <View style={styles.periodSwitcher}>
+      <Pressable accessibilityRole="button" accessibilityLabel="上一个周期" style={styles.periodButton} onPress={onPrevious}>
+        <ChevronLeft color="#16805f" size={19} />
+      </Pressable>
+      <Text style={styles.periodLabel}>{label}</Text>
+      <Pressable accessibilityRole="button" accessibilityLabel="下一个周期" style={styles.periodButton} onPress={onNext}>
+        <ChevronRight color="#16805f" size={19} />
+      </Pressable>
+    </View>
+  );
+}
+
+function ReportMetricGrid({ totals }: { totals: ReturnType<typeof getMonthlyReport>["totals"] }) {
+  return (
+    <View style={styles.reportMetricGrid}>
+      <MetricCard label="收入" value={formatMoney(totals.income)} />
+      <MetricCard label="支出" value={formatMoney(totals.expense)} />
+      <MetricCard label="结余" value={formatMoney(totals.net)} />
+      <MetricCard label="结余率" value={`${totals.savingsRate}%`} />
+    </View>
+  );
+}
+
+function MonthlyTrendChart({ points }: { points: ReturnType<typeof getMonthlyReport>["dailyTrend"] }) {
+  const maxTrend = Math.max(...points.map((item) => item.amount), 1);
+
+  if (points.every((point) => point.amount === 0)) {
+    return <Text style={styles.emptyText}>这个月还没有支出记录</Text>;
+  }
+
+  return (
+    <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.monthlyTrendScroll}>
+      {points.map((point, index) => (
+        <View key={point.date} style={styles.monthlyTrendColumn}>
+          <Text style={styles.trendValue}>{point.amount > 0 ? `¥${Math.round(point.amount)}` : ""}</Text>
+          <View style={styles.trendTrack}>
+            <View style={[styles.trendBar, { height: `${Math.max(5, (point.amount / maxTrend) * 100)}%` }]} />
+          </View>
+          <Text style={styles.trendLabel}>{index % 5 === 0 || index === points.length - 1 ? point.label.slice(3) : ""}</Text>
+        </View>
+      ))}
+    </ScrollView>
+  );
+}
+
+function YearlyTrendChart({ summaries }: { summaries: ReturnType<typeof getYearlyReport>["monthlySummaries"] }) {
+  const maxExpense = Math.max(...summaries.map((summary) => summary.expense), 1);
+
+  return (
+    <View style={styles.yearlyRows}>
+      {summaries.map((summary) => (
+        <View key={summary.month} style={styles.yearlyRow}>
+          <Text style={styles.yearlyMonth}>{summary.label}</Text>
+          <View style={styles.yearlyBarTrack}>
+            <View style={[styles.yearlyBar, { width: `${Math.max(3, (summary.expense / maxExpense) * 100)}%` }]} />
+          </View>
+          <View style={styles.yearlyNumbers}>
+            <Text style={styles.yearlyExpense}>{formatMoney(summary.expense)}</Text>
+            <Text style={styles.muted}>结余 {formatMoney(summary.net)}</Text>
+          </View>
+        </View>
+      ))}
+    </View>
+  );
+}
+
+function CategoryRanking({ categories }: { categories: ReturnType<typeof getMonthlyReport>["categories"] }) {
+  if (categories.length === 0) {
+    return <Text style={styles.emptyText}>当前周期还没有支出记录</Text>;
+  }
+
+  return (
+    <View style={styles.stackSmall}>
+      {categories.slice(0, 8).map((item) => (
+        <View key={item.category} style={styles.categoryRow}>
+          <View style={styles.rowBetween}>
+            <Text style={styles.itemTitle}>{labelFor(item.category)}</Text>
+            <Text style={styles.muted}>{item.percent}%</Text>
+          </View>
+          <ProgressBar level="healthy" percent={item.percent} />
+          <Text style={styles.categoryAmount}>{formatMoney(item.amount)}</Text>
+        </View>
+      ))}
+    </View>
+  );
+}
+
+function TopExpenseMonths({ months }: { months: ReturnType<typeof getYearlyReport>["topExpenseMonths"] }) {
+  if (months.length === 0) {
+    return <Text style={styles.emptyText}>这一年还没有支出记录</Text>;
+  }
+
+  return (
+    <View style={styles.stackSmall}>
+      {months.map((month) => (
+        <View key={month.month} style={styles.topMonthRow}>
+          <View>
+            <Text style={styles.itemTitle}>{month.label}</Text>
+            <Text style={styles.muted}>收入 {formatMoney(month.income)} · 结余 {formatMoney(month.net)}</Text>
+          </View>
+          <Text style={styles.amount}>-{formatMoney(month.expense)}</Text>
+        </View>
+      ))}
+    </View>
+  );
+}
+
+function shiftMonth(month: string, offset: number) {
+  const [year, monthIndex] = month.split("-").map(Number);
+  const date = new Date(year, monthIndex - 1 + offset, 1);
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
+}
+
+function formatMonthLabel(month: string) {
+  const [year, monthValue] = month.split("-");
+  return `${year} 年 ${Number(monthValue)} 月`;
 }
 
 function TransactionList({ records, onDelete }: { records: Transaction[]; onDelete?: (id: string) => void }) {
@@ -897,6 +1046,11 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     gap: 10,
   },
+  reportMetricGrid: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 10,
+  },
   metricCard: {
     flex: 1,
     minWidth: 0,
@@ -1019,6 +1173,30 @@ const styles = StyleSheet.create({
   },
   segmentTextActive: {
     color: "#17352f",
+  },
+  periodSwitcher: {
+    minHeight: 48,
+    borderWidth: 1,
+    borderColor: "#dce9e5",
+    borderRadius: 8,
+    backgroundColor: "#ffffff",
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingHorizontal: 8,
+  },
+  periodButton: {
+    width: 38,
+    height: 38,
+    borderRadius: 8,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "#e7f5ef",
+  },
+  periodLabel: {
+    color: "#17352f",
+    fontSize: 16,
+    fontWeight: "900",
   },
   field: {
     gap: 7,
@@ -1179,6 +1357,56 @@ const styles = StyleSheet.create({
     color: "#668078",
     fontSize: 10,
   },
+  monthlyTrendScroll: {
+    height: 176,
+    gap: 6,
+    paddingTop: 14,
+    paddingBottom: 2,
+  },
+  monthlyTrendColumn: {
+    width: 30,
+    height: "100%",
+    alignItems: "center",
+    justifyContent: "flex-end",
+    gap: 4,
+  },
+  yearlyRows: {
+    gap: 11,
+    marginTop: 14,
+  },
+  yearlyRow: {
+    minHeight: 46,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
+  },
+  yearlyMonth: {
+    width: 34,
+    color: "#31534b",
+    fontSize: 12,
+    fontWeight: "900",
+  },
+  yearlyBarTrack: {
+    flex: 1,
+    height: 10,
+    borderRadius: 999,
+    overflow: "hidden",
+    backgroundColor: "rgba(22,128,95,0.12)",
+  },
+  yearlyBar: {
+    height: "100%",
+    borderRadius: 999,
+    backgroundColor: "#48b08f",
+  },
+  yearlyNumbers: {
+    width: 96,
+    alignItems: "flex-end",
+  },
+  yearlyExpense: {
+    color: "#17352f",
+    fontSize: 12,
+    fontWeight: "900",
+  },
   categoryRow: {
     gap: 7,
   },
@@ -1186,6 +1414,18 @@ const styles = StyleSheet.create({
     color: "#17352f",
     fontSize: 13,
     fontWeight: "900",
+  },
+  topMonthRow: {
+    minHeight: 54,
+    borderWidth: 1,
+    borderColor: "#edf2f0",
+    borderRadius: 8,
+    backgroundColor: "#fbfdfc",
+    padding: 10,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    gap: 10,
   },
   emptyText: {
     color: "#668078",
