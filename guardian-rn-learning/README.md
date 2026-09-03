@@ -11,21 +11,86 @@
 - Mock GraphQL 服务层。
 - 登录态、商品目录、商品详情、购物车、优惠券钱包、扫码模拟、深链跳转和维护模式。
 
-## 常用命令
+## 安装与运行流程
+
+### 1. 进入项目目录
+
+```bash
+cd /Users/edy/Documents/MY/guardian-rn-learning
+```
+
+### 2. 安装依赖
+
+这个学习项目是 React Native CLI 风格项目。第一次运行前先安装 JS 依赖：
+
+```bash
+yarn install --ignore-scripts
+```
+
+这里使用 `--ignore-scripts` 是为了跳过原生依赖的 postinstall/build 脚本，适合先学习 JS 代码、跑测试和启动 Metro。
+
+### 3. 先跑测试
+
+```bash
+yarn test --runInBand
+```
+
+正常结果应该看到：
+
+```text
+Test Suites: 2 passed, 2 total
+Tests:       7 passed, 7 total
+```
+
+### 4. 启动 Metro
+
+React Native 需要先启动 Metro dev server。建议单独开一个终端窗口运行：
+
+```bash
+yarn start
+```
+
+看到类似下面的信息，说明 Metro 已经启动：
+
+```text
+Welcome to React Native v0.79
+Dev server ready
+```
+
+### 5. 运行 iOS 或 Android App
+
+保持 Metro 终端不要关闭，再打开第二个终端进入同一个项目目录。
+
+如果本机已经配置好 Xcode、CocoaPods 和 iOS 模拟器，可以运行：
+
+```bash
+yarn ios
+```
+
+如果本机已经配置好 Android Studio、Android SDK 和模拟器，可以运行：
+
+```bash
+yarn android
+```
+
+### 6. 如果只是学习代码
+
+如果你暂时不想配置 iOS/Android 原生环境，可以先只做这三步：
 
 ```bash
 cd /Users/edy/Documents/MY/guardian-rn-learning
 yarn install --ignore-scripts
 yarn test --runInBand
-yarn start
 ```
 
-如果本机 iOS 或 Android 开发环境已经配置好，可以使用 React Native CLI 运行原生 App：
+然后按下面的“关键文件”和“建议体验顺序”阅读源码。真正上模拟器运行时，再补齐本机 React Native 原生环境。
 
-```bash
-yarn ios
-yarn android
-```
+### 常见问题
+
+- `react-native start` 提示缺少 CLI：确认 `package.json` 里有 `@react-native-community/cli`，然后重新执行 `yarn install --ignore-scripts`。
+- `yarn ios` 失败：通常是 Xcode、模拟器、CocoaPods 或 iOS 原生工程缺失导致。这个学习项目重点是 JS 架构，不包含完整生产 iOS 配置。
+- `yarn android` 失败：通常是 Android SDK、模拟器或 Gradle 原生工程配置问题。这个学习项目重点是理解原项目架构，不包含完整生产 Android 配置。
+- 只想验证逻辑是否正常：运行 `yarn test --runInBand` 即可。
 
 ## 关键文件
 
