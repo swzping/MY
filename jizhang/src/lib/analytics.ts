@@ -6,6 +6,10 @@ export type MonthlyTotals = {
   net: number;
 };
 
+export type ReportTotals = MonthlyTotals & {
+  savingsRate: number;
+};
+
 export type BudgetStatus = {
   limit: number;
   spent: number;
@@ -20,10 +24,36 @@ export type CategorySpending = {
   percent: number;
 };
 
+export type ReportCategory = CategorySpending;
+
 export type TrendPoint = {
   date: string;
   label: string;
   amount: number;
+};
+
+export type MonthlyReport = {
+  month: string;
+  totals: ReportTotals;
+  dailyTrend: TrendPoint[];
+  categories: ReportCategory[];
+  records: Transaction[];
+};
+
+export type MonthSummary = {
+  month: string;
+  label: string;
+  income: number;
+  expense: number;
+  net: number;
+};
+
+export type YearlyReport = {
+  year: string;
+  totals: ReportTotals;
+  monthlySummaries: MonthSummary[];
+  topExpenseMonths: MonthSummary[];
+  categories: ReportCategory[];
 };
 
 export function getMonthlyTotals(records: Transaction[], date: string): MonthlyTotals {
@@ -36,6 +66,58 @@ export function getMonthlyTotals(records: Transaction[], date: string): MonthlyT
     income,
     expense,
     net: income - expense,
+  };
+}
+
+export function getLatestRecordDate(records: Transaction[]): string {
+  return records
+    .filter((record) => isValidDateKey(record.date))
+    .map((record) => record.date)
+    .sort((a, b) => b.localeCompare(a))[0] ?? formatDate(new Date());
+}
+
+export function getMonthlyReport(records: Transaction[], month: string): MonthlyReport {
+  const monthlyRecords = getRecordsForMonth(records, month);
+  const income = sumRecords(monthlyRecords, "income");
+  const expense = sumRecords(monthlyRecords, "expense");
+
+  return {
+    month,
+    totals: buildReportTotals(income, expense),
+    dailyTrend: buildMonthExpenseTrend(monthlyRecords, month),
+    categories: getCategoryRanking(monthlyRecords),
+    records: getRecentRecords(monthlyRecords, 30),
+  };
+}
+
+export function getYearlyReport(records: Transaction[], year: string): YearlyReport {
+  const yearlyRecords = records.filter((record) => record.date.startsWith(`${year}-`));
+  const income = sumRecords(yearlyRecords, "income");
+  const expense = sumRecords(yearlyRecords, "expense");
+  const monthlySummaries = Array.from({ length: 12 }, (_, index) => {
+    const month = `${year}-${String(index + 1).padStart(2, "0")}`;
+    const monthRecords = getRecordsForMonth(yearlyRecords, month);
+    const monthIncome = sumRecords(monthRecords, "income");
+    const monthExpense = sumRecords(monthRecords, "expense");
+
+    return {
+      month,
+      label: `${index + 1}月`,
+      income: monthIncome,
+      expense: monthExpense,
+      net: monthIncome - monthExpense,
+    };
+  });
+
+  return {
+    year,
+    totals: buildReportTotals(income, expense),
+    monthlySummaries,
+    topExpenseMonths: monthlySummaries
+      .filter((summary) => summary.expense > 0)
+      .sort((a, b) => b.expense - a.expense)
+      .slice(0, 3),
+    categories: getCategoryRanking(yearlyRecords),
   };
 }
 
@@ -152,6 +234,64 @@ function sumRecords(records: Transaction[], type: "income" | "expense") {
   return records
     .filter((record) => record.type === type)
     .reduce((sum, record) => sum + record.amount, 0);
+}
+
+function getRecordsForMonth(records: Transaction[], month: string) {
+  return records.filter((record) => record.date.startsWith(month));
+}
+
+function buildReportTotals(income: number, expense: number): ReportTotals {
+  const net = income - expense;
+
+  return {
+    income,
+    expense,
+    net,
+    savingsRate: income <= 0 ? 0 : Math.round((net / income) * 100),
+  };
+}
+
+function buildMonthExpenseTrend(records: Transaction[], month: string): TrendPoint[] {
+  const [yearValue, monthValue] = month.split("-").map(Number);
+  const daysInMonth = new Date(yearValue, monthValue, 0).getDate();
+
+  return Array.from({ length: daysInMonth }, (_, index) => {
+    const day = String(index + 1).padStart(2, "0");
+    const date = `${month}-${day}`;
+    const amount = records
+      .filter((record) => record.type === "expense" && record.date === date)
+      .reduce((sum, record) => sum + record.amount, 0);
+
+    return {
+      date,
+      label: date.slice(5).replace("-", "/"),
+      amount,
+    };
+  });
+}
+
+function getCategoryRanking(records: Transaction[]): ReportCategory[] {
+  const totals = new Map<string, number>();
+
+  records
+    .filter((record) => record.type === "expense")
+    .forEach((record) => {
+      totals.set(record.category, (totals.get(record.category) ?? 0) + record.amount);
+    });
+
+  const totalExpense = [...totals.values()].reduce((sum, amount) => sum + amount, 0);
+
+  return [...totals.entries()]
+    .map(([category, amount]) => ({
+      category,
+      amount,
+      percent: totalExpense === 0 ? 0 : Math.round((amount / totalExpense) * 100),
+    }))
+    .sort((a, b) => b.amount - a.amount);
+}
+
+function isValidDateKey(date: string) {
+  return /^\d{4}-\d{2}-\d{2}$/.test(date);
 }
 
 function getBudgetLevel(percent: number, remaining: number): BudgetLevel {
