@@ -1,7 +1,7 @@
 import React from 'react';
 import {useReactiveVar} from '@apollo/client';
 import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
-import {Pressable, StyleSheet, Text} from 'react-native';
+import {StyleSheet, Text} from 'react-native';
 
 import TabBarIcon from '@app/components/TabBarIcon';
 import {modules} from '@app/config/modules';
@@ -16,10 +16,6 @@ import AccountScreen from '@app/features/account/AccountScreen';
 const Tab = createBottomTabNavigator();
 
 const inactiveColor = '#5F665F';
-
-const TabButton = props => (
-  <Pressable {...props} android_ripple={{color: 'transparent'}} style={props.style} />
-);
 
 const renderLabel = label => ({focused}) => (
   <Text
@@ -47,7 +43,6 @@ const AppTabs = () => {
       screenOptions={{
         headerShown: false,
         tabBarActiveTintColor: colors.primary,
-        tabBarButton: TabButton,
         tabBarHideOnKeyboard: true,
         tabBarIconStyle: styles.iconSlot,
         tabBarInactiveTintColor: inactiveColor,

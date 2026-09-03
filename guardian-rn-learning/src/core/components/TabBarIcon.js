@@ -64,7 +64,7 @@ const TabBarIcon = ({name, focused, badge}) => {
   const normalizedBadge = Number(badge || 0);
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, focused && styles.activeContainer]}>
       <Mark color={color} />
       {normalizedBadge > 0 ? (
         <View style={styles.badge}>
@@ -80,10 +80,14 @@ const TabBarIcon = ({name, focused, badge}) => {
 const styles = StyleSheet.create({
   container: {
     alignItems: 'center',
-    height: 30,
+    borderRadius: 16,
+    height: 31,
     justifyContent: 'center',
     position: 'relative',
-    width: 34,
+    width: 42,
+  },
+  activeContainer: {
+    backgroundColor: '#EAF5EF',
   },
   badge: {
     alignItems: 'center',
