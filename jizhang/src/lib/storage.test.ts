@@ -50,7 +50,41 @@ describe("storage", () => {
 
     await saveAppData(storage, data);
 
-    await expect(loadAppData(storage)).resolves.toEqual(data);
+    const loaded = await loadAppData(storage);
+
+    expect(loaded.budget).toEqual(data.budget);
+    expect(loaded.records).toContainEqual(data.records[0]);
+  });
+
+  it("merges seeded history records into existing saved data", async () => {
+    const storage = new MemoryStorage();
+    const savedRecord = {
+      id: "manual-record-1",
+      type: "expense" as const,
+      amount: 45,
+      category: "Food",
+      date: "2026-09-02",
+      note: "Manual dinner",
+      createdAt: "2026-09-02T19:30:00.000Z",
+    };
+    await storage.setItem(
+      "personal-budget-app:data",
+      JSON.stringify({
+        budget: {
+          monthlyBudget: 3000,
+          categoryBudgets: {
+            Food: 900,
+          },
+        },
+        records: [savedRecord],
+      }),
+    );
+
+    const loaded = await loadAppData(storage);
+
+    expect(loaded.budget.monthlyBudget).toBe(3000);
+    expect(loaded.records[0]).toEqual(savedRecord);
+    expect(loaded.records.some((record) => record.id.startsWith("history-"))).toBe(true);
   });
 
   it("falls back to sample data when saved JSON is corrupted", async () => {

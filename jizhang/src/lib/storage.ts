@@ -16,7 +16,7 @@ export async function loadAppData(storage: StorageLike): Promise<AppData> {
     }
 
     const parsed = JSON.parse(saved);
-    return isAppData(parsed) ? parsed : sampleData;
+    return isAppData(parsed) ? mergeWithSeedData(parsed) : sampleData;
   } catch {
     return sampleData;
   }
@@ -59,4 +59,23 @@ function isTransaction(value: unknown): value is Transaction {
     typeof record.note === "string" &&
     typeof record.createdAt === "string"
   );
+}
+
+function mergeWithSeedData(savedData: AppData): AppData {
+  const recordsById = new Map<string, Transaction>();
+
+  sampleData.records.forEach((record) => {
+    recordsById.set(record.id, record);
+  });
+  savedData.records.forEach((record) => {
+    recordsById.set(record.id, record);
+  });
+
+  return {
+    budget: savedData.budget,
+    records: [...recordsById.values()].sort((a, b) => {
+      const dateCompare = b.date.localeCompare(a.date);
+      return dateCompare === 0 ? b.createdAt.localeCompare(a.createdAt) : dateCompare;
+    }),
+  };
 }
