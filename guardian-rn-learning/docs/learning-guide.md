@@ -1,49 +1,72 @@
-# Guardian RN Learning Guide
+# Guardian RN 学习指南
 
-## Study Path
+这份文档给出当前学习项目的阅读顺序、练习方向和常用命令。建议先按顺序阅读，再动手改一个小功能。
 
-1. **Start with aliasing**
+## 学习路径
 
-   Read `aliases.json`, `babel.config.js`, `src/core/features/home/HomeScreen.js`, and `src/override/features/home/HomeScreen.js`. The app imports `@app/features/home/HomeScreen`, but the override version wins.
+1. **先理解 alias 覆盖机制**
 
-2. **Read module config**
+   阅读 `aliases.json`、`babel.config.js`、`src/core/features/home/HomeScreen.js` 和 `src/override/features/home/HomeScreen.js`。
 
-   Compare `src/core/config/modules.js` and `src/override/config/modules.js`. This mirrors the source project's `swift.config.js` pattern.
+   项目里虽然统一引入 `@app/features/home/HomeScreen`，但实际会优先命中 `src/override` 里的首页。这就是原项目 override-first 架构的简化版。
 
-3. **Understand global state**
+2. **阅读模块配置**
 
-   Read `src/core/services/cache.js`. Notice how reactive variables avoid passing cart and user state through every screen.
+   对比 `src/core/config/modules.js` 和 `src/override/config/modules.js`。
 
-4. **Follow initialization**
+   这对应原项目里的 `swift.config.js` 思路：用配置集中管理页面名称、模块开关和业务定制。
 
-   Read `App.js` and `src/core/hooks/useAppInitialize.js`. This is the learning version of the source app startup flow.
+3. **理解全局状态**
 
-5. **Trace navigation**
+   阅读 `src/core/services/cache.js`。
 
-   Read `src/core/navigation/AppNavigator.js`, `AppStack.js`, `AuthStack.js`, and `AppTabs.js`. The app switches between auth, maintenance, and main app states.
+   这里用 Apollo reactive variables 管理登录态、购物车、优惠券、维护模式和 snackbar。页面通过 `useReactiveVar` 订阅状态变化，不需要层层传 props。
 
-6. **Study pure business logic**
+4. **跟一遍启动流程**
 
-   Read `src/core/helpers/cartLogic.js` and `src/core/helpers/deepLink.js`, then run:
+   阅读 `App.js` 和 `src/core/hooks/useAppInitialize.js`。
+
+   这是原项目启动编排的学习版：真实项目会初始化 Firebase、埋点、Remote Config、用户信息等；学习项目用 mock 状态模拟这个过程。
+
+5. **追踪导航结构**
+
+   阅读 `src/core/navigation/AppNavigator.js`、`AppStack.js`、`AuthStack.js` 和 `AppTabs.js`。
+
+   重点看 App 如何在登录页、维护页和主 App 之间切换，以及底部 Tab 如何挂载首页、商品、购物车、扫码和账号页面。
+
+6. **学习纯业务逻辑**
+
+   阅读 `src/core/helpers/cartLogic.js` 和 `src/core/helpers/deepLink.js`，然后运行测试：
 
    ```bash
    yarn test --runInBand
    ```
 
-7. **Walk the features**
+   购物车价格计算、优惠券折扣、扫码和深链解析都适合写成纯函数，这样更容易测试和维护。
 
-   Use the screens in this order: Auth Landing, Home, Catalog, Product Detail, Cart, Coupon Wallet, Scanner Simulator, Account.
+7. **按业务链路体验页面**
 
-## Exercises
+   推荐体验顺序：
 
-- Add a new coupon type called `minimumSpend` that only applies above a subtotal threshold.
-- Add a new module switch that disables Scanner and shows a snackbar when tapped.
-- Add a new deep-link type such as `guardian://event/health-check`.
-- Persist selected product history in AsyncStorage.
-- Replace another core screen with an override version and document what changed.
-- Add a mock GraphQL error and handle it like a session-expiry event.
+   1. 登录页。
+   2. 首页。
+   3. 商品列表。
+   4. 商品详情。
+   5. 购物车。
+   6. 优惠券钱包。
+   7. 扫码模拟器。
+   8. 账号页。
 
-## Useful Commands
+## 练习题
+
+- 新增一种优惠券类型，例如 `minimumSpend`，只在小计达到指定金额后生效。
+- 新增一个模块开关，让 Scanner 关闭时不进入页面，而是弹出 snackbar。
+- 新增一种 deep link，例如 `guardian://event/health-check`。
+- 用 AsyncStorage 保存最近浏览过的商品。
+- 再写一个 override 页面，例如覆盖账号页，并记录和 core 页面的区别。
+- 在 mock GraphQL 服务里模拟接口错误，并按会话过期的方式处理。
+
+## 常用命令
 
 ```bash
 cd /Users/edy/Documents/MY/guardian-rn-learning
@@ -53,12 +76,12 @@ yarn ios
 yarn android
 ```
 
-## Mental Model
+## 理解模型
 
-Think of the original project as three layers:
+可以把原项目理解成三层：
 
-- **Platform layer:** React Native, native iOS/Android projects, Firebase, device APIs.
-- **App framework layer:** navigation, Apollo, storage, module registry, global state, shared components.
-- **Brand/business layer:** Guardian-specific modules, styling, promotions, coupons, scanner rules, account pages.
+- **平台层**：React Native、iOS/Android 原生工程、Firebase、设备能力。
+- **App 框架层**：导航、Apollo、存储、模块注册表、全局状态、公共组件。
+- **品牌业务层**：Guardian 定制页面、主题样式、促销、优惠券、扫码规则、账号体系。
 
-This learning app focuses on the second and third layers because they carry the most reusable engineering lessons.
+当前学习项目重点学习第二层和第三层，因为它们最能复用到其他业务 App 中。
