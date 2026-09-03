@@ -21,15 +21,32 @@ cd /Users/edy/Documents/MY/guardian-rn-learning
 
 ### 2. 安装依赖
 
-这个学习项目是 React Native CLI 风格项目。第一次运行前先安装 JS 依赖：
+这个学习项目是 React Native CLI 项目。第一次运行前先安装 JS 依赖：
 
 ```bash
 yarn install --ignore-scripts
 ```
 
-这里使用 `--ignore-scripts` 是为了跳过原生依赖的 postinstall/build 脚本，适合先学习 JS 代码、跑测试和启动 Metro。
+这里使用 `--ignore-scripts` 是为了跳过依赖包里的自动脚本，安装更可控。
 
-### 3. 先跑测试
+### 3. 安装 iOS Pods
+
+如果要运行 iOS，需要先安装 CocoaPods 依赖：
+
+```bash
+yarn pods
+```
+
+这个命令实际执行的是：
+
+```bash
+cd ios
+LANG=en_US.UTF-8 LC_ALL=en_US.UTF-8 pod install
+```
+
+如果你看到 Ruby/Bundler 版本错误，可以先不要使用 `bundle install`，直接执行上面的 `pod install`。本机已验证 `pod 1.16.2` 可以安装成功。
+
+### 4. 先跑测试
 
 ```bash
 yarn test --runInBand
@@ -42,7 +59,7 @@ Test Suites: 2 passed, 2 total
 Tests:       7 passed, 7 total
 ```
 
-### 4. 启动 Metro
+### 5. 启动 Metro
 
 React Native 需要先启动 Metro dev server。建议单独开一个终端窗口运行：
 
@@ -57,15 +74,35 @@ Welcome to React Native v0.79
 Dev server ready
 ```
 
-### 5. 运行 iOS 或 Android App
+### 6. 运行 iOS App
 
 保持 Metro 终端不要关闭，再打开第二个终端进入同一个项目目录。
 
-如果本机已经配置好 Xcode、CocoaPods 和 iOS 模拟器，可以运行：
+默认命令会启动 `iPhone 16` 模拟器，避免误选真机导致签名错误：
 
 ```bash
 yarn ios
 ```
+
+如果你的机器没有 `iPhone 16` 模拟器，可以先查看可用模拟器：
+
+```bash
+xcrun simctl list devices available
+```
+
+然后手动指定一个存在的模拟器，例如：
+
+```bash
+yarn react-native run-ios --simulator "iPhone 15 Plus"
+```
+
+如果你确实想跑到真机，需要先在 Xcode 里配置 Apple Development Team，然后执行：
+
+```bash
+yarn ios:device
+```
+
+### 7. 运行 Android App
 
 如果本机已经配置好 Android Studio、Android SDK 和模拟器，可以运行：
 
@@ -73,9 +110,9 @@ yarn ios
 yarn android
 ```
 
-### 6. 如果只是学习代码
+### 8. 如果只是学习代码
 
-如果你暂时不想配置 iOS/Android 原生环境，可以先只做这三步：
+如果你暂时不想配置 iOS/Android 原生环境，可以先只做这些步骤：
 
 ```bash
 cd /Users/edy/Documents/MY/guardian-rn-learning
@@ -88,7 +125,9 @@ yarn test --runInBand
 ### 常见问题
 
 - `react-native start` 提示缺少 CLI：确认 `package.json` 里有 `@react-native-community/cli`，然后重新执行 `yarn install --ignore-scripts`。
-- `yarn ios` 失败：通常是 Xcode、模拟器、CocoaPods 或 iOS 原生工程缺失导致。这个学习项目重点是 JS 架构，不包含完整生产 iOS 配置。
+- `yarn ios` 提示找不到 `Pods-GuardianLearningApp.debug.xcconfig`：先运行 `yarn pods`。
+- `yarn ios:device` 提示需要 development team：这是跑真机需要签名。打开 `ios/GuardianLearningApp.xcworkspace`，在 Signing & Capabilities 里选择你的 Apple Team。
+- `yarn ios` 找不到 `iPhone 16`：用 `xcrun simctl list devices available` 找一个你本机存在的模拟器，再手动指定 `--simulator`。
 - `yarn android` 失败：通常是 Android SDK、模拟器或 Gradle 原生工程配置问题。这个学习项目重点是理解原项目架构，不包含完整生产 Android 配置。
 - 只想验证逻辑是否正常：运行 `yarn test --runInBand` 即可。
 

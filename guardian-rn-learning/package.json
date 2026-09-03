@@ -5,7 +5,9 @@
   "main": "index.js",
   "scripts": {
     "android": "react-native run-android",
-    "ios": "react-native run-ios",
+    "ios": "react-native run-ios --simulator \"iPhone 16\"",
+    "ios:device": "react-native run-ios",
+    "pods": "cd ios && LANG=en_US.UTF-8 LC_ALL=en_US.UTF-8 pod install",
     "start": "react-native start",
     "test": "jest"
   },
