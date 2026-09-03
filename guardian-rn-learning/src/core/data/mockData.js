@@ -7,6 +7,10 @@ const products = [
     category: 'vitamins',
     brand: 'guardian-health',
     price: 12,
+    originalPrice: 15,
+    badge: 'Member Deal',
+    rating: 4.8,
+    stockLabel: 'In stock',
     description: 'A compact product used to learn catalog, detail, and cart flows.',
   },
   {
@@ -17,6 +21,10 @@ const products = [
     category: 'skincare',
     brand: 'clean-lab',
     price: 18,
+    originalPrice: 22,
+    badge: 'Best Seller',
+    rating: 4.7,
+    stockLabel: 'Low stock',
     description: 'A second product used to test URL and QR routing.',
   },
   {
@@ -27,7 +35,25 @@ const products = [
     category: 'health',
     brand: 'guardian-health',
     price: 25,
+    originalPrice: 29,
+    badge: 'Online Only',
+    rating: 4.6,
+    stockLabel: 'In stock',
     description: 'A larger cart item for subtotal and coupon examples.',
+  },
+  {
+    sku: 'SKU-004',
+    barcode: '8991002100043',
+    name: 'Kids Immunity Gummies',
+    urlKey: 'kids-immunity-gummies',
+    category: 'vitamins',
+    brand: 'little-guardian',
+    price: 16,
+    originalPrice: 19,
+    badge: 'New',
+    rating: 4.9,
+    stockLabel: 'In stock',
+    description: 'A colorful learning item for two-column catalog layouts.',
   },
 ];
 
@@ -53,8 +79,17 @@ const linkExamples = [
   'https://guardian.test/cms/membership-benefit',
 ];
 
+const member = {
+  name: 'Guardian Learner',
+  email: 'learner@example.com',
+  level: 'Gold Member',
+  memberId: 'GL-1024',
+  nextReward: 'Spend $18 more to unlock a bonus coupon',
+};
+
 module.exports = {
   products,
   coupons,
   linkExamples,
+  member,
 };
