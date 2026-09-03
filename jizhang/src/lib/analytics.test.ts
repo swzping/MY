@@ -4,6 +4,7 @@ import {
   getLatestRecordDate,
   getBudgetStatus,
   getCategorySpending,
+  getExpenseRecordsByCategory,
   getMonthlyTotals,
   getMonthlyReport,
   getYearlyReport,
@@ -203,5 +204,13 @@ describe("analytics", () => {
 
   it("uses zero savings rate when income is zero", () => {
     expect(getMonthlyReport(reportRecords, "2026-07").totals.savingsRate).toBe(0);
+  });
+
+  it("gets expense records for one category in a selected period", () => {
+    expect(getExpenseRecordsByCategory(reportRecords, "食", "2026")).toEqual([
+      reportRecords[0],
+      reportRecords[3],
+    ]);
+    expect(getExpenseRecordsByCategory(reportRecords, "食", "2026-08")).toEqual([reportRecords[0]]);
   });
 });

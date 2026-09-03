@@ -38,6 +38,7 @@ import {
   getBudgetStatus,
   getCategoryBudgetStatuses,
   getCategorySpending,
+  getExpenseRecordsByCategory,
   getLatestRecordDate,
   getMonthlyTotals,
   getMonthlyReport,
@@ -562,14 +563,24 @@ function AnalysisScreen({ metrics, records }: { metrics: Metrics; records: Trans
   const [reportMode, setReportMode] = useState<"month" | "year">("month");
   const [selectedMonth, setSelectedMonth] = useState(latestDate.slice(0, 7));
   const [selectedYear, setSelectedYear] = useState(latestDate.slice(0, 4));
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const monthlyReport = useMemo(() => getMonthlyReport(records, selectedMonth), [records, selectedMonth]);
   const yearlyReport = useMemo(() => getYearlyReport(records, selectedYear), [records, selectedYear]);
   const activeReport = reportMode === "month" ? monthlyReport : yearlyReport;
+  const activePeriod = reportMode === "month" ? selectedMonth : selectedYear;
+  const selectedCategoryRecords = useMemo(
+    () => (selectedCategory ? getExpenseRecordsByCategory(records, selectedCategory, activePeriod) : []),
+    [records, selectedCategory, activePeriod],
+  );
 
   useEffect(() => {
     setSelectedMonth(latestDate.slice(0, 7));
     setSelectedYear(latestDate.slice(0, 4));
   }, [latestDate]);
+
+  useEffect(() => {
+    setSelectedCategory(null);
+  }, [reportMode, activePeriod]);
 
   return (
     <View style={styles.stack}>
@@ -605,7 +616,18 @@ function AnalysisScreen({ metrics, records }: { metrics: Metrics; records: Trans
 
       <View style={styles.panel}>
         <SectionHeader icon={<BarChart3 color="#16805f" size={18} />} title="分类排行" />
-        <CategoryRanking categories={activeReport.categories} />
+        <CategoryRanking
+          categories={activeReport.categories}
+          selectedCategory={selectedCategory}
+          onSelectCategory={(category) => setSelectedCategory((current) => (current === category ? null : category))}
+        />
+        {selectedCategory && (
+          <CategoryDetail
+            category={selectedCategory}
+            periodLabel={reportMode === "month" ? formatMonthLabel(selectedMonth) : `${selectedYear} 年`}
+            records={selectedCategoryRecords}
+          />
+        )}
       </View>
 
       {reportMode === "year" && (
@@ -702,23 +724,68 @@ function YearlyTrendChart({ summaries }: { summaries: ReturnType<typeof getYearl
   );
 }
 
-function CategoryRanking({ categories }: { categories: ReturnType<typeof getMonthlyReport>["categories"] }) {
+function CategoryRanking({
+  categories,
+  selectedCategory,
+  onSelectCategory,
+}: {
+  categories: ReturnType<typeof getMonthlyReport>["categories"];
+  selectedCategory: string | null;
+  onSelectCategory: (category: string) => void;
+}) {
   if (categories.length === 0) {
     return <Text style={styles.emptyText}>当前周期还没有支出记录</Text>;
   }
 
   return (
     <View style={styles.stackSmall}>
-      {categories.slice(0, 8).map((item) => (
-        <View key={item.category} style={styles.categoryRow}>
+      {categories.slice(0, 8).map((item) => {
+        const selected = selectedCategory === item.category;
+
+        return (
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={`查看${labelFor(item.category)}明细`}
+          key={item.category}
+          style={[styles.categoryRow, styles.categoryPressable, selected && styles.categoryRowSelected]}
+          onPress={() => onSelectCategory(item.category)}
+        >
           <View style={styles.rowBetween}>
             <Text style={styles.itemTitle}>{labelFor(item.category)}</Text>
-            <Text style={styles.muted}>{item.percent}%</Text>
+            <Text style={[styles.muted, selected && styles.selectedMuted]}>{selected ? "收起" : `${item.percent}%`}</Text>
           </View>
           <ProgressBar level="healthy" percent={item.percent} />
           <Text style={styles.categoryAmount}>{formatMoney(item.amount)}</Text>
+        </Pressable>
+        );
+      })}
+    </View>
+  );
+}
+
+function CategoryDetail({
+  category,
+  periodLabel,
+  records,
+}: {
+  category: string;
+  periodLabel: string;
+  records: Transaction[];
+}) {
+  return (
+    <View style={styles.categoryDetail}>
+      <View style={styles.categoryDetailHeader}>
+        <View>
+          <Text style={styles.itemTitle}>{labelFor(category)}明细</Text>
+          <Text style={styles.muted}>
+            {periodLabel} · {records.length} 笔
+          </Text>
         </View>
-      ))}
+        <Text style={styles.categoryDetailTotal}>
+          {formatMoney(records.reduce((sum, record) => sum + record.amount, 0))}
+        </Text>
+      </View>
+      <TransactionList records={records} />
     </View>
   );
 }
@@ -1410,9 +1477,42 @@ const styles = StyleSheet.create({
   categoryRow: {
     gap: 7,
   },
+  categoryPressable: {
+    borderWidth: 1,
+    borderColor: "transparent",
+    borderRadius: 8,
+    padding: 8,
+    marginHorizontal: -8,
+  },
+  categoryRowSelected: {
+    borderColor: "#16805f",
+    backgroundColor: "#f2faf7",
+  },
   categoryAmount: {
     color: "#17352f",
     fontSize: 13,
+    fontWeight: "900",
+  },
+  selectedMuted: {
+    color: "#16805f",
+    fontWeight: "900",
+  },
+  categoryDetail: {
+    borderTopWidth: 1,
+    borderTopColor: "#dce9e5",
+    marginTop: 14,
+    paddingTop: 14,
+    gap: 12,
+  },
+  categoryDetailHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    gap: 10,
+  },
+  categoryDetailTotal: {
+    color: "#16805f",
+    fontSize: 16,
     fontWeight: "900",
   },
   topMonthRow: {

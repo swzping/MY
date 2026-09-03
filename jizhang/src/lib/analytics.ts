@@ -121,6 +121,22 @@ export function getYearlyReport(records: Transaction[], year: string): YearlyRep
   };
 }
 
+export function getExpenseRecordsByCategory(
+  records: Transaction[],
+  category: string,
+  periodPrefix: string,
+): Transaction[] {
+  return getRecentRecords(
+    records.filter(
+      (record) =>
+        record.type === "expense" &&
+        record.category === category &&
+        record.date.startsWith(periodPrefix),
+    ),
+    records.length,
+  );
+}
+
 export function getBudgetStatus(
   records: Transaction[],
   budget: BudgetState,
