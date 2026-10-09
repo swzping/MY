@@ -572,6 +572,7 @@ function AnalysisScreen({ metrics, records }: { metrics: Metrics; records: Trans
     () => (selectedCategory ? getExpenseRecordsByCategory(records, selectedCategory, activePeriod) : []),
     [records, selectedCategory, activePeriod],
   );
+  const activePeriodLabel = reportMode === "month" ? formatMonthLabel(selectedMonth) : `${selectedYear} 年`;
 
   useEffect(() => {
     setSelectedMonth(latestDate.slice(0, 7));
@@ -581,6 +582,17 @@ function AnalysisScreen({ metrics, records }: { metrics: Metrics; records: Trans
   useEffect(() => {
     setSelectedCategory(null);
   }, [reportMode, activePeriod]);
+
+  if (selectedCategory) {
+    return (
+      <CategoryDetailScreen
+        category={selectedCategory}
+        periodLabel={activePeriodLabel}
+        records={selectedCategoryRecords}
+        onBack={() => setSelectedCategory(null)}
+      />
+    );
+  }
 
   return (
     <View style={styles.stack}>
@@ -618,16 +630,8 @@ function AnalysisScreen({ metrics, records }: { metrics: Metrics; records: Trans
         <SectionHeader icon={<BarChart3 color="#16805f" size={18} />} title="分类排行" />
         <CategoryRanking
           categories={activeReport.categories}
-          selectedCategory={selectedCategory}
-          onSelectCategory={(category) => setSelectedCategory((current) => (current === category ? null : category))}
+          onSelectCategory={(category) => setSelectedCategory(category)}
         />
-        {selectedCategory && (
-          <CategoryDetail
-            category={selectedCategory}
-            periodLabel={reportMode === "month" ? formatMonthLabel(selectedMonth) : `${selectedYear} 年`}
-            records={selectedCategoryRecords}
-          />
-        )}
       </View>
 
       {reportMode === "year" && (
@@ -726,11 +730,9 @@ function YearlyTrendChart({ summaries }: { summaries: ReturnType<typeof getYearl
 
 function CategoryRanking({
   categories,
-  selectedCategory,
   onSelectCategory,
 }: {
   categories: ReturnType<typeof getMonthlyReport>["categories"];
-  selectedCategory: string | null;
   onSelectCategory: (category: string) => void;
 }) {
   if (categories.length === 0) {
@@ -739,53 +741,66 @@ function CategoryRanking({
 
   return (
     <View style={styles.stackSmall}>
-      {categories.slice(0, 8).map((item) => {
-        const selected = selectedCategory === item.category;
-
-        return (
+      {categories.slice(0, 8).map((item) => (
         <Pressable
           accessibilityRole="button"
           accessibilityLabel={`查看${labelFor(item.category)}明细`}
           key={item.category}
-          style={[styles.categoryRow, styles.categoryPressable, selected && styles.categoryRowSelected]}
+          style={[styles.categoryRow, styles.categoryPressable]}
           onPress={() => onSelectCategory(item.category)}
         >
           <View style={styles.rowBetween}>
             <Text style={styles.itemTitle}>{labelFor(item.category)}</Text>
-            <Text style={[styles.muted, selected && styles.selectedMuted]}>{selected ? "收起" : `${item.percent}%`}</Text>
+            <View style={styles.categoryPercent}>
+              <Text style={styles.muted}>{item.percent}%</Text>
+              <ChevronRight color="#8a9b96" size={16} />
+            </View>
           </View>
           <ProgressBar level="healthy" percent={item.percent} />
           <Text style={styles.categoryAmount}>{formatMoney(item.amount)}</Text>
         </Pressable>
-        );
-      })}
+      ))}
     </View>
   );
 }
 
-function CategoryDetail({
+function CategoryDetailScreen({
   category,
   periodLabel,
   records,
+  onBack,
 }: {
   category: string;
   periodLabel: string;
   records: Transaction[];
+  onBack: () => void;
 }) {
   return (
-    <View style={styles.categoryDetail}>
-      <View style={styles.categoryDetailHeader}>
+    <View style={styles.stack}>
+      <Pressable accessibilityRole="button" accessibilityLabel="返回分析页" style={styles.backButton} onPress={onBack}>
+        <ChevronLeft color="#16805f" size={19} />
+        <Text style={styles.backButtonText}>返回分析</Text>
+      </Pressable>
+
+      <View style={styles.detailHero}>
         <View>
-          <Text style={styles.itemTitle}>{labelFor(category)}明细</Text>
-          <Text style={styles.muted}>
-            {periodLabel} · {records.length} 笔
+          <Text style={styles.heroLabelMuted}>{periodLabel}</Text>
+          <Text style={styles.detailTitle}>{labelFor(category)}明细</Text>
+          <Text style={styles.detailSubtitle}>
+            {records.length} 笔支出
           </Text>
         </View>
-        <Text style={styles.categoryDetailTotal}>
+        <Text numberOfLines={1} adjustsFontSizeToFit style={styles.categoryDetailTotal}>
           {formatMoney(records.reduce((sum, record) => sum + record.amount, 0))}
         </Text>
       </View>
-      <TransactionList records={records} />
+
+      <View style={styles.panel}>
+        <SectionHeader icon={<ReceiptText color="#16805f" size={18} />} title="账单明细" />
+        <View style={styles.categoryDetailList}>
+          <TransactionList records={records} />
+        </View>
+      </View>
     </View>
   );
 }
@@ -1484,36 +1499,65 @@ const styles = StyleSheet.create({
     padding: 8,
     marginHorizontal: -8,
   },
-  categoryRowSelected: {
-    borderColor: "#16805f",
-    backgroundColor: "#f2faf7",
+  categoryPercent: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 2,
   },
   categoryAmount: {
     color: "#17352f",
     fontSize: 13,
     fontWeight: "900",
   },
-  selectedMuted: {
+  backButton: {
+    alignSelf: "flex-start",
+    minHeight: 38,
+    borderRadius: 8,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+    paddingHorizontal: 10,
+    backgroundColor: "#e7f5ef",
+  },
+  backButtonText: {
     color: "#16805f",
+    fontSize: 13,
     fontWeight: "900",
   },
-  categoryDetail: {
-    borderTopWidth: 1,
-    borderTopColor: "#dce9e5",
-    marginTop: 14,
-    paddingTop: 14,
-    gap: 12,
-  },
-  categoryDetailHeader: {
+  detailHero: {
+    borderRadius: 8,
+    backgroundColor: "#17352f",
+    padding: 16,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    gap: 10,
+    gap: 12,
+  },
+  heroLabelMuted: {
+    color: "rgba(255,255,255,0.72)",
+    fontSize: 12,
+    fontWeight: "800",
+    marginBottom: 5,
+  },
+  detailTitle: {
+    color: "#ffffff",
+    fontSize: 25,
+    fontWeight: "900",
+    marginBottom: 5,
+  },
+  detailSubtitle: {
+    color: "rgba(255,255,255,0.78)",
+    fontSize: 12,
+    fontWeight: "800",
   },
   categoryDetailTotal: {
-    color: "#16805f",
-    fontSize: 16,
+    color: "#ffffff",
+    fontSize: 20,
     fontWeight: "900",
+    maxWidth: 132,
+  },
+  categoryDetailList: {
+    marginTop: 12,
   },
   topMonthRow: {
     minHeight: 54,
