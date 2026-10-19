@@ -286,22 +286,25 @@ function buildMonthExpenseTrend(records: Transaction[], month: string): TrendPoi
   });
 }
 
-function getCategoryRanking(records: Transaction[]): ReportCategory[] {
+export function getCategoryRanking(
+  records: Transaction[],
+  type: Transaction["type"] = "expense",
+): ReportCategory[] {
   const totals = new Map<string, number>();
 
   records
-    .filter((record) => record.type === "expense")
+    .filter((record) => record.type === type)
     .forEach((record) => {
       totals.set(record.category, (totals.get(record.category) ?? 0) + record.amount);
     });
 
-  const totalExpense = [...totals.values()].reduce((sum, amount) => sum + amount, 0);
+  const totalAmount = [...totals.values()].reduce((sum, amount) => sum + amount, 0);
 
   return [...totals.entries()]
     .map(([category, amount]) => ({
       category,
       amount,
-      percent: totalExpense === 0 ? 0 : Math.round((amount / totalExpense) * 100),
+      percent: totalAmount === 0 ? 0 : Math.round((amount / totalAmount) * 100),
     }))
     .sort((a, b) => b.amount - a.amount);
 }
@@ -332,4 +335,23 @@ function formatDate(date: Date) {
   const month = String(date.getMonth() + 1).padStart(2, "0");
   const day = String(date.getDate()).padStart(2, "0");
   return `${year}-${month}-${day}`;
+}
+
+export function getCategoryBreakdown(records: Transaction[], type: Transaction["type"]) {
+  return getCategoryRanking(records, type).map((parent) => ({
+    ...parent,
+    subcategories: getCategoryRanking(
+      records.filter((record) => record.type === type && record.category === parent.category)
+        .map((record) => ({ ...record, category: record.subcategory?.trim() || "未分类" })),
+      type,
+    ),
+  }));
+}
+
+export function getSubcategoryRecords(
+  records: Transaction[], type: Transaction["type"], category: string, subcategory: string,
+): Transaction[] {
+  return records.filter((record) => record.type === type && record.category === category
+    && (record.subcategory?.trim() || "未分类") === subcategory)
+    .sort((a, b) => b.date.localeCompare(a.date) || b.createdAt.localeCompare(a.createdAt));
 }

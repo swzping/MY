@@ -5,6 +5,10 @@ export type Transaction = {
   type: TransactionType;
   amount: number;
   category: string;
+  subcategory?: string;
+  excelSync?: "pending" | "synced";
+  updatedAt?: string;
+  excelOriginal?: Pick<Transaction, "id" | "type" | "amount" | "category" | "subcategory" | "date" | "createdAt" | "note">;
   date: string;
   note: string;
   createdAt: string;

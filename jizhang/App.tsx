@@ -4,6 +4,7 @@ import {
   BarChart3,
   CalendarDays,
   ChevronLeft,
+  ChevronDown,
   ChevronRight,
   Home,
   LineChart,
@@ -14,11 +15,12 @@ import {
   Trash2,
   WalletCards,
 } from "lucide-react-native";
-import { useEffect, useMemo, useState } from "react";
+import { createContext, useContext, useEffect, useMemo, useRef, useState } from "react";
 import {
   Alert,
   ImageBackground,
   Pressable,
+  Platform,
   SafeAreaView,
   ScrollView,
   StatusBar,
@@ -29,8 +31,7 @@ import {
 } from "react-native";
 import {
   categoryLabels,
-  expenseCategories,
-  incomeCategories,
+  getCategoryOptions,
 } from "./src/data/categories";
 import { sampleData } from "./src/data/sampleData";
 import {
@@ -38,6 +39,8 @@ import {
   getBudgetStatus,
   getCategoryBudgetStatuses,
   getCategorySpending,
+  getCategoryBreakdown,
+  getSubcategoryRecords,
   getExpenseRecordsByCategory,
   getLatestRecordDate,
   getMonthlyTotals,
@@ -46,8 +49,12 @@ import {
   getYearlyReport,
   validateRecordInput,
 } from "./src/lib/analytics";
+import { editRecord, editableNote } from "./src/lib/editRecord";
+import { queueUnsyncedRecords, syncRecordToExcel } from "./src/lib/excelSync";
 import { loadAppData, saveAppData } from "./src/lib/storage";
 import type { AppData, BudgetLevel, Transaction, TransactionType } from "./src/lib/types";
+
+const EditRecordContext = createContext<(record: Transaction) => void>(() => {});
 
 type Tab = "home" | "record" | "budget" | "analysis";
 
@@ -55,6 +62,7 @@ type RecordForm = {
   type: TransactionType;
   amount: string;
   category: string;
+  subcategory: string;
   date: string;
   note: string;
 };
@@ -63,7 +71,8 @@ const today = new Date().toISOString().slice(0, 10);
 const money = new Intl.NumberFormat("zh-CN", {
   style: "currency",
   currency: "CNY",
-  maximumFractionDigits: 0,
+  minimumFractionDigits: 2,
+  maximumFractionDigits: 2,
 });
 
 const tabItems = [
@@ -85,16 +94,34 @@ void SplashScreen.preventAutoHideAsync().catch(() => {
 });
 
 export default function App() {
+  const contentScroll = useRef<ScrollView>(null);
+  const scrollOffset = useRef(0);
+  const overviewOffset = useRef(0);
+
+  function handleDetailNavigation(open: boolean) {
+    if (open) overviewOffset.current = scrollOffset.current;
+    requestAnimationFrame(() => {
+      contentScroll.current?.scrollTo({ y: open ? 0 : overviewOffset.current, animated: false });
+    });
+  }
+
+  const [editing, setEditing] = useState<Transaction | null>(null);
+  const editReturnOffset = useRef(0);
   const [activeTab, setActiveTab] = useState<Tab>("home");
   const [showStartup, setShowStartup] = useState(true);
   const [startupImageReady, setStartupImageReady] = useState(false);
   const [startupSlide, setStartupSlide] = useState(0);
   const [data, setData] = useState<AppData>(sampleData);
   const [isReady, setIsReady] = useState(false);
+  const [syncMessage, setSyncMessage] = useState("");
+  const [retrySync, setRetrySync] = useState(0);
+  const savingRecord = useRef(false);
+  const pendingCount = data.records.filter((record) => record.excelSync === "pending").length;
   const [form, setForm] = useState<RecordForm>({
     type: "expense",
     amount: "",
-    category: "Food",
+    category: "食",
+    subcategory: "早午晚餐",
     date: today,
     note: "",
   });
@@ -105,7 +132,9 @@ export default function App() {
 
     loadAppData(AsyncStorage).then((loadedData) => {
       if (!active) return;
-      setData(loadedData);
+      setData(Platform.OS === "web"
+        ? { ...loadedData, records: queueUnsyncedRecords(loadedData.records) }
+        : loadedData);
       setBudgetDraft(String(loadedData.budget.monthlyBudget));
       setIsReady(true);
     });
@@ -116,10 +145,50 @@ export default function App() {
   }, []);
 
   useEffect(() => {
-    if (isReady) {
-      saveAppData(AsyncStorage, data);
+    if (!isReady) return;
+    let active = true;
+    async function persistAndSync() {
+      try {
+        await saveAppData(AsyncStorage, data);
+        if (!active || Platform.OS !== "web") return;
+        const pending = data.records.filter((record) => record.excelSync === "pending");
+        if (!pending.length) {
+          if (data.records.some((record) => record.excelSync === "synced")) setSyncMessage("账单已同步到 history.xlsx");
+          return;
+        }
+        setSyncMessage(`正在同步 ${pending.length} 笔账单到表格…`);
+        const completed: string[] = [];
+        let failure = "";
+        for (const record of pending) {
+          if (!active) return;
+          try {
+            await syncRecordToExcel(record);
+            completed.push(record.id);
+          } catch (error) {
+            failure = error instanceof Error ? error.message : "表格同步失败";
+            break;
+          }
+        }
+        if (!active) return;
+        if (completed.length) {
+          setData((current) => ({ ...current, records: current.records.map((record) =>
+            completed.includes(record.id) && pending.some((sent) => sent.id === record.id && sent.updatedAt === record.updatedAt)
+              ? { ...record, excelSync: "synced", excelOriginal: undefined } : record) }));
+        }
+        setSyncMessage(failure ? `账单已保存在本机，待同步：${failure}` : "账单已同步到 history.xlsx");
+      } catch {
+        if (active) setSyncMessage("本机账单保存失败，请检查浏览器存储空间后重试");
+      }
     }
-  }, [data, isReady]);
+    void persistAndSync();
+    return () => { active = false; };
+  }, [data, isReady, retrySync]);
+
+  useEffect(() => {
+    if (Platform.OS !== "web" || !pendingCount) return;
+    const timer = setInterval(() => setRetrySync((value) => value + 1), 30000);
+    return () => clearInterval(timer);
+  }, [pendingCount]);
 
   useEffect(() => {
     if (showStartup) {
@@ -187,13 +256,24 @@ export default function App() {
   }, [startupImageReady]);
 
   const metrics = useMemo(() => {
+    const cumulative = data.records.reduce(
+      (totals, record) => {
+        totals[record.type] += record.amount;
+        return totals;
+      },
+      { income: 0, expense: 0 },
+    );
+
     return {
       totals: getMonthlyTotals(data.records, today),
       budget: getBudgetStatus(data.records, data.budget, today),
       categories: getCategorySpending(data.records, today),
       categoryBudgets: getCategoryBudgetStatuses(data.records, data.budget, today),
       trend: buildSevenDayTrend(data.records, today),
-      recent: getRecentRecords(data.records, 6),
+      cumulative,
+      incomeCategories: getCategoryBreakdown(data.records, "income"),
+      expenseCategories: getCategoryBreakdown(data.records, "expense"),
+      recordCount: data.records.length,
     };
   }, [data]);
 
@@ -211,11 +291,13 @@ export default function App() {
     setForm((current) => ({
       ...current,
       type,
-      category: type === "expense" ? "Food" : "Salary",
+      category: type === "expense" ? "食" : "职业收入",
+      subcategory: type === "expense" ? "早午晚餐" : "工资收入",
     }));
   }
 
-  function addRecord() {
+  async function addRecord() {
+    if (savingRecord.current || !isReady) return;
     const amount = Number(form.amount);
     const errors = validateRecordInput({
       amount,
@@ -228,25 +310,66 @@ export default function App() {
       return;
     }
 
-    const record: Transaction = {
+    const record: Transaction = editing ? editRecord(editing, {
+      type: form.type, amount, category: form.category, subcategory: form.subcategory.trim(),
+      date: form.date, note: form.note.trim(),
+    }, Platform.OS === "web") : {
       id: `${Date.now()}-${Math.random().toString(16).slice(2)}`,
       type: form.type,
       amount,
       category: form.category,
+      subcategory: form.subcategory.trim(),
       date: form.date,
       note: form.note.trim(),
       createdAt: new Date().toISOString(),
+      ...(Platform.OS === "web" ? { excelSync: "pending" as const } : {}),
     };
 
-    setData((current) => ({ ...current, records: [record, ...current.records] }));
+    savingRecord.current = true;
+    const updated = { ...data, records: editing
+      ? data.records.map((item) => item.id === record.id ? record : item)
+      : [record, ...data.records] };
+    try {
+      await saveAppData(AsyncStorage, updated);
+      setData(updated);
+    } catch {
+      Alert.alert("保存失败", "账单尚未保存，请检查浏览器存储空间后重试。");
+      return;
+    } finally {
+      savingRecord.current = false;
+    }
     setForm({
       type: "expense",
       amount: "",
-      category: "Food",
+      category: "食",
+      subcategory: "早午晚餐",
       date: today,
       note: "",
     });
-    setActiveTab("home");
+    if (editing) {
+      setEditing(null);
+      requestAnimationFrame(() => contentScroll.current?.scrollTo({ y: editReturnOffset.current, animated: false }));
+    } else setActiveTab("home");
+  }
+
+  function beginEdit(record: Transaction) {
+    editReturnOffset.current = scrollOffset.current;
+    setEditing(record);
+    setForm({ type: record.type, amount: String(record.amount), category: record.category,
+      subcategory: record.subcategory ?? "", date: record.date, note: editableNote(record) });
+    requestAnimationFrame(() => contentScroll.current?.scrollTo({ y: 0, animated: false }));
+  }
+
+  function cancelEdit() {
+    setEditing(null);
+    setForm({ type: "expense", amount: "", category: "食", subcategory: "早午晚餐", date: today, note: "" });
+    requestAnimationFrame(() => contentScroll.current?.scrollTo({ y: editReturnOffset.current, animated: false }));
+  }
+
+  function beginNewRecord() {
+    setEditing(null);
+    setForm({ type: "expense", amount: "", category: "食", subcategory: "早午晚餐", date: today, note: "" });
+    setActiveTab("record");
   }
 
   function deleteRecord(id: string) {
@@ -280,34 +403,51 @@ export default function App() {
   }
 
   return (
+    <EditRecordContext.Provider value={beginEdit}>
     <SafeAreaView style={styles.safeArea}>
       <StatusBar barStyle="dark-content" backgroundColor="#f7faf9" />
       <View style={styles.app}>
         <View style={styles.topBar}>
           <View>
             <Text style={styles.eyebrow}>个人账本</Text>
-            <Text style={styles.title}>{getTitle(activeTab)}</Text>
+            <Text style={styles.title}>{editing ? "修改账单" : getTitle(activeTab)}</Text>
           </View>
           <Pressable
             accessibilityRole="button"
             accessibilityLabel="新增账单"
             style={styles.iconButton}
-            onPress={() => setActiveTab("record")}
+            onPress={beginNewRecord}
           >
             <Plus color="#ffffff" size={20} />
           </Pressable>
         </View>
 
         <ScrollView
+          ref={contentScroll}
+          onScroll={(event) => { scrollOffset.current = event.nativeEvent.contentOffset.y; }}
+          scrollEventThrottle={16}
           contentContainerStyle={styles.content}
           keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}
         >
+          {Platform.OS === "web" && syncMessage !== "" && (
+            <View style={[styles.panel, styles.stackSmall]}>
+              <Text style={styles.muted}>{syncMessage}</Text>
+              {pendingCount > 0 && (
+                <Pressable accessibilityRole="button" onPress={() => setRetrySync((value) => value + 1)}>
+                  <Text style={styles.backButtonText}>重试同步（{pendingCount} 笔）</Text>
+                </Pressable>
+              )}
+            </View>
+          )}
+          {editing && <RecordScreen form={form} onChange={setForm} onTypeChange={setFormType}
+            onSubmit={addRecord} editing onCancel={cancelEdit} records={data.records} />}
+          <View style={editing ? { display: "none" } : undefined}>
           {activeTab === "home" && (
-            <HomeScreen metrics={metrics} onRecord={() => setActiveTab("record")} onDelete={deleteRecord} />
+            <HomeScreen onDetailNavigation={handleDetailNavigation} records={data.records} metrics={metrics} onRecord={beginNewRecord} />
           )}
           {activeTab === "record" && (
-            <RecordScreen form={form} onChange={setForm} onTypeChange={setFormType} onSubmit={addRecord} />
+            <RecordScreen form={form} onChange={setForm} onTypeChange={setFormType} onSubmit={addRecord} records={data.records} />
           )}
           {activeTab === "budget" && (
             <BudgetScreen
@@ -320,6 +460,7 @@ export default function App() {
             />
           )}
           {activeTab === "analysis" && <AnalysisScreen metrics={metrics} records={data.records} />}
+          </View>
         </ScrollView>
 
         <View style={styles.bottomNav}>
@@ -332,7 +473,7 @@ export default function App() {
                 accessibilityLabel={item.label}
                 key={item.id}
                 style={[styles.navItem, active && styles.navItemActive]}
-                onPress={() => setActiveTab(item.id)}
+                onPress={() => { if (editing) cancelEdit(); setActiveTab(item.id); }}
               >
                 <Icon color={active ? "#16805f" : "#6d817c"} size={20} />
                 <Text style={[styles.navLabel, active && styles.navLabelActive]}>{item.label}</Text>
@@ -342,6 +483,7 @@ export default function App() {
         </View>
       </View>
     </SafeAreaView>
+    </EditRecordContext.Provider>
   );
 }
 
@@ -383,15 +525,32 @@ function StartupCarousel({
 
 function HomeScreen({
   metrics,
+  records,
   onRecord,
-  onDelete,
+  onDetailNavigation,
 }: {
   metrics: Metrics;
+  records: Transaction[];
   onRecord: () => void;
-  onDelete: (id: string) => void;
+  onDetailNavigation: (open: boolean) => void;
 }) {
+  const [selected, setSelected] = useState<{
+    type: TransactionType; category: string; subcategory: string;
+  } | null>(null);
+
   return (
-    <View style={styles.stack}>
+    <>
+      {selected && (
+        <CategoryDetailScreen
+          category={selected.subcategory}
+          periodLabel={`全部时间 · ${labelFor(selected.category)} · ${selected.type === "income" ? "收入" : "支出"}`}
+          records={getSubcategoryRecords(records, selected.type, selected.category, selected.subcategory)}
+          transactionType={selected.type}
+          backLabel="返回总览"
+          onBack={() => { setSelected(null); onDetailNavigation(false); }}
+        />
+      )}
+    <View style={[styles.stack, selected ? { display: "none" } : undefined]}>
       <View style={[styles.heroPanel, levelBackground(metrics.budget.level)]}>
         <View style={styles.heroRow}>
           <View>
@@ -417,8 +576,85 @@ function HomeScreen({
         <Text style={styles.primaryActionText}>快速记一笔</Text>
       </Pressable>
 
-      <SectionHeader icon={<CalendarDays color="#16805f" size={18} />} title="最近账单" />
-      <TransactionList records={metrics.recent} onDelete={onDelete} />
+      <SectionHeader icon={<WalletCards color="#16805f" size={18} />} title="累计收支总览" />
+      <Text style={styles.muted}>统计全部历史账单及手动记账</Text>
+      <View style={styles.metricGrid}>
+        <MetricCard label="总收入" value={formatMoney(metrics.cumulative.income)} />
+        <MetricCard label="总支出" value={formatMoney(metrics.cumulative.expense)} />
+      </View>
+      <View style={styles.metricGrid}>
+        <MetricCard label="累计结余" value={formatMoney(metrics.cumulative.income - metrics.cumulative.expense)} />
+        <MetricCard label="账单笔数" value={`${metrics.recordCount} 笔`} />
+      </View>
+      <OverviewCategories title="收入分类" categories={metrics.incomeCategories} onSelect={(category, subcategory) => { setSelected({ type: "income", category, subcategory }); onDetailNavigation(true); }} />
+      <OverviewCategories title="支出分类" categories={metrics.expenseCategories} onSelect={(category, subcategory) => { setSelected({ type: "expense", category, subcategory }); onDetailNavigation(true); }} />
+    </View>
+    </>
+  );
+}
+
+function OverviewCategories({ title, categories, onSelect }: {
+  title: string;
+  categories: ReturnType<typeof getCategoryBreakdown>;
+  onSelect: (category: string, subcategory: string) => void;
+}) {
+  const [expanded, setExpanded] = useState<Set<string>>(() => new Set());
+
+  function toggle(category: string) {
+    setExpanded((current) => {
+      const next = new Set(current);
+      if (next.has(category)) next.delete(category);
+      else next.add(category);
+      return next;
+    });
+  }
+
+  return (
+    <View style={styles.stackSmall}>
+      <SectionHeader icon={<BarChart3 color="#16805f" size={18} />} title={title} />
+      <Text style={styles.muted}>点击大类展开小类</Text>
+      {categories.length === 0 ? <Text style={styles.emptyText}>暂无记录</Text> : categories.map((item) => (
+        <View key={item.category} style={styles.categoryRow}>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={`${expanded.has(item.category) ? "收起" : "展开"}${labelFor(item.category)}小类`}
+            accessibilityState={{ expanded: expanded.has(item.category) }}
+            onPress={() => toggle(item.category)}
+            style={styles.stackSmall}
+          >
+            <View style={styles.rowBetween}>
+              <Text style={styles.itemTitle}>{labelFor(item.category)}</Text>
+              <View style={styles.categoryPercent}>
+                <Text style={styles.muted}>{item.percent}%</Text>
+                {expanded.has(item.category)
+                  ? <ChevronDown color="#16805f" size={18} />
+                  : <ChevronRight color="#16805f" size={18} />}
+              </View>
+            </View>
+            <ProgressBar level="healthy" percent={item.percent} />
+            <Text style={styles.categoryAmount}>{formatMoney(item.amount)}</Text>
+          </Pressable>
+          {expanded.has(item.category) && (
+            <View style={styles.subcategoryList}>
+              <Text style={styles.muted}>小类金额 · 占本大类比例</Text>
+              {item.subcategories.map((child) => (
+                <Pressable key={child.category} style={styles.subcategoryRow}
+                  accessibilityRole="button"
+                  accessibilityLabel={`查看${labelFor(item.category)}${child.category}明细`}
+                  onPress={() => onSelect(item.category, child.category)}
+                >
+                  <Text style={styles.subcategoryName}>{child.category}</Text>
+                  <View style={styles.subcategoryValues}>
+                    <Text style={styles.categoryAmount}>{formatMoney(child.amount)}</Text>
+                    <Text style={styles.muted}>{child.percent}%</Text>
+                  </View>
+                  <ChevronRight color="#16805f" size={18} />
+                </Pressable>
+              ))}
+            </View>
+          )}
+        </View>
+      ))}
     </View>
   );
 }
@@ -428,16 +664,25 @@ function RecordScreen({
   onChange,
   onTypeChange,
   onSubmit,
+  editing = false,
+  onCancel,
+  records,
 }: {
   form: RecordForm;
   onChange: (form: RecordForm) => void;
   onTypeChange: (type: TransactionType) => void;
   onSubmit: () => void;
+  editing?: boolean;
+  onCancel?: () => void;
+  records: Transaction[];
 }) {
-  const categories = form.type === "expense" ? expenseCategories : incomeCategories;
+  const categoryOptions = getCategoryOptions(form.type, records, editing ? form : undefined);
+  const categories = Object.keys(categoryOptions);
+  const subcategories = categoryOptions[form.category] ?? [];
 
   return (
     <View style={[styles.panel, styles.stack]}>
+      {editing && <Pressable accessibilityRole="button" onPress={onCancel}><Text style={styles.backButtonText}>取消修改，返回账单</Text></Pressable>}
       <View style={styles.segmented}>
         <SegmentButton active={form.type === "expense"} label="支出" onPress={() => onTypeChange("expense")} />
         <SegmentButton active={form.type === "income"} label="收入" onPress={() => onTypeChange("income")} />
@@ -453,19 +698,28 @@ function RecordScreen({
         />
       </Field>
 
-      <Field label="分类">
+      <Field label="一级分类">
         <View style={styles.choiceWrap}>
           {categories.map((category) => (
             <ChoiceChip
               active={form.category === category}
               key={category}
               label={labelFor(category)}
-              onPress={() => onChange({ ...form, category })}
+              onPress={() => onChange({ ...form, category, subcategory: category === form.category ? form.subcategory : categoryOptions[category][0] ?? "" })}
             />
           ))}
         </View>
       </Field>
 
+      <Field label="二级分类">
+        <View style={styles.choiceWrap}>
+          {subcategories.map((subcategory) => (
+            <ChoiceChip key={subcategory} label={subcategory || "未分类"}
+              active={form.subcategory === subcategory}
+              onPress={() => onChange({ ...form, subcategory })} />
+          ))}
+        </View>
+      </Field>
       <Field label="日期">
         <TextInput
           placeholder="YYYY-MM-DD"
@@ -488,7 +742,7 @@ function RecordScreen({
 
       <Pressable style={styles.primaryAction} onPress={onSubmit}>
         <Plus color="#ffffff" size={20} />
-        <Text style={styles.primaryActionText}>保存账单</Text>
+        <Text style={styles.primaryActionText}>{editing ? "保存修改" : "保存账单"}</Text>
       </Pressable>
     </View>
   );
@@ -769,17 +1023,21 @@ function CategoryDetailScreen({
   periodLabel,
   records,
   onBack,
+  transactionType = "expense",
+  backLabel = "返回分析",
 }: {
   category: string;
   periodLabel: string;
   records: Transaction[];
   onBack: () => void;
+  transactionType?: TransactionType;
+  backLabel?: string;
 }) {
   return (
     <View style={styles.stack}>
-      <Pressable accessibilityRole="button" accessibilityLabel="返回分析页" style={styles.backButton} onPress={onBack}>
+      <Pressable accessibilityRole="button" accessibilityLabel={backLabel} style={styles.backButton} onPress={onBack}>
         <ChevronLeft color="#16805f" size={19} />
-        <Text style={styles.backButtonText}>返回分析</Text>
+        <Text style={styles.backButtonText}>{backLabel}</Text>
       </Pressable>
 
       <View style={styles.detailHero}>
@@ -787,7 +1045,7 @@ function CategoryDetailScreen({
           <Text style={styles.heroLabelMuted}>{periodLabel}</Text>
           <Text style={styles.detailTitle}>{labelFor(category)}明细</Text>
           <Text style={styles.detailSubtitle}>
-            {records.length} 笔支出
+            {records.length} 笔{transactionType === "income" ? "收入" : "支出"}
           </Text>
         </View>
         <Text numberOfLines={1} adjustsFontSizeToFit style={styles.categoryDetailTotal}>
@@ -798,7 +1056,7 @@ function CategoryDetailScreen({
       <View style={styles.panel}>
         <SectionHeader icon={<ReceiptText color="#16805f" size={18} />} title="账单明细" />
         <View style={styles.categoryDetailList}>
-          <TransactionList records={records} />
+          <TransactionList records={records} showFullNotes />
         </View>
       </View>
     </View>
@@ -836,7 +1094,8 @@ function formatMonthLabel(month: string) {
   return `${year} 年 ${Number(monthValue)} 月`;
 }
 
-function TransactionList({ records, onDelete }: { records: Transaction[]; onDelete?: (id: string) => void }) {
+function TransactionList({ records, onDelete, showFullNotes = false }: { records: Transaction[]; onDelete?: (id: string) => void; showFullNotes?: boolean }) {
+  const onEdit = useContext(EditRecordContext);
   if (records.length === 0) {
     return <Text style={styles.emptyText}>还没有账单，先记一笔吧。</Text>;
   }
@@ -844,7 +1103,8 @@ function TransactionList({ records, onDelete }: { records: Transaction[]; onDele
   return (
     <View style={styles.transactionList}>
       {records.map((record) => (
-        <View key={record.id} style={styles.transaction}>
+        <Pressable key={record.id} style={styles.transaction} accessibilityRole="button"
+          accessibilityLabel={`修改${record.date}${labelFor(record.category)}${formatMoney(record.amount)}账单`} onPress={() => onEdit(record)}>
           <View style={[styles.badge, record.type === "income" && styles.badgeIncome]}>
             <Text style={[styles.badgeText, record.type === "income" && styles.badgeTextIncome]}>
               {record.type === "income" ? "入" : "出"}
@@ -854,7 +1114,7 @@ function TransactionList({ records, onDelete }: { records: Transaction[]; onDele
             <Text numberOfLines={1} style={styles.itemTitle}>
               {labelFor(record.category)}
             </Text>
-            <Text numberOfLines={1} style={styles.muted}>
+            <Text numberOfLines={showFullNotes ? undefined : 1} style={styles.muted}>
               {record.date}
               {record.note ? ` · ${record.note}` : ""}
             </Text>
@@ -868,7 +1128,8 @@ function TransactionList({ records, onDelete }: { records: Transaction[]; onDele
               <Trash2 color="#8a9b96" size={16} />
             </Pressable>
           )}
-        </View>
+          <ChevronRight color="#8a9b96" size={16} />
+        </Pressable>
       ))}
     </View>
   );
@@ -913,7 +1174,8 @@ function SegmentButton({ active, label, onPress }: { active: boolean; label: str
 
 function ChoiceChip({ active, label, onPress }: { active: boolean; label: string; onPress: () => void }) {
   return (
-    <Pressable style={[styles.choiceChip, active && styles.choiceChipActive]} onPress={onPress}>
+    <Pressable accessibilityRole="button" accessibilityState={{ selected: active }}
+      style={[styles.choiceChip, active && styles.choiceChipActive]} onPress={onPress}>
       <Text style={[styles.choiceChipText, active && styles.choiceChipTextActive]}>{label}</Text>
     </Pressable>
   );
@@ -933,7 +1195,10 @@ type Metrics = {
   categories: ReturnType<typeof getCategorySpending>;
   categoryBudgets: ReturnType<typeof getCategoryBudgetStatuses>;
   trend: ReturnType<typeof buildSevenDayTrend>;
-  recent: ReturnType<typeof getRecentRecords>;
+  cumulative: { income: number; expense: number };
+  incomeCategories: ReturnType<typeof getCategoryBreakdown>;
+  expenseCategories: ReturnType<typeof getCategoryBreakdown>;
+  recordCount: number;
 };
 
 function getTitle(tab: Tab) {
@@ -1124,6 +1389,21 @@ const styles = StyleSheet.create({
     fontSize: 13,
     fontWeight: "800",
   },
+  subcategoryList: {
+    marginTop: 14,
+    paddingTop: 12,
+    borderTopWidth: 1,
+    borderTopColor: "#dce9e5",
+    gap: 12,
+  },
+  subcategoryRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    gap: 12,
+  },
+  subcategoryName: { flex: 1, color: "#17352f", fontSize: 14 },
+  subcategoryValues: { alignItems: "flex-end", gap: 4 },
   metricGrid: {
     flexDirection: "row",
     gap: 10,

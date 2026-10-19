@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { sampleData } from "../data/sampleData";
 import { loadAppData, saveAppData } from "./storage";
-import type { AppData } from "./types";
+import type { AppData, Transaction } from "./types";
 
 class MemoryStorage {
   private values = new Map<string, string>();
@@ -20,6 +20,67 @@ class MemoryStorage {
 }
 
 describe("storage", () => {
+
+  it("removes unchanged legacy demo records while preserving real records and budget", async () => {
+    const storage = new MemoryStorage();
+    const legacyRecords: Transaction[] = [
+    {
+      id: "sample-1",
+      type: "income",
+      amount: 12000,
+      category: "Salary",
+      date: "2026-06-01",
+      note: "本月工资",
+      createdAt: "2026-06-01T09:00:00.000Z",
+    },
+    {
+      id: "sample-2",
+      type: "expense",
+      amount: 86,
+      category: "Food",
+      date: "2026-06-12",
+      note: "午餐和咖啡",
+      createdAt: "2026-06-12T12:30:00.000Z",
+    },
+    {
+      id: "sample-3",
+      type: "expense",
+      amount: 38,
+      category: "Transport",
+      date: "2026-06-13",
+      note: "地铁充值",
+      createdAt: "2026-06-13T18:10:00.000Z",
+    },
+    {
+      id: "sample-4",
+      type: "expense",
+      amount: 328,
+      category: "Shopping",
+      date: "2026-06-15",
+      note: "生活用品",
+      createdAt: "2026-06-15T20:10:00.000Z",
+    },
+  ];
+    const manualRecord: Transaction = { ...legacyRecords[1], id: "manual-1" };
+    const budget = { monthlyBudget: 7777, categoryBudgets: { Food: 1000 } };
+    await saveAppData(storage, { budget, records: [...sampleData.records, ...legacyRecords, manualRecord] });
+    const loaded = await loadAppData(storage);
+    expect(loaded.records).toHaveLength(sampleData.records.length + 1);
+    expect(loaded.records).toContainEqual(manualRecord);
+    expect(loaded.budget).toEqual(budget);
+    const total = (type: Transaction["type"]) => loaded.records
+      .filter((record) => record.type === type)
+      .reduce((sum, record) => sum + record.amount, 0);
+    expect(total("income")).toBeCloseTo(1727245.85, 2);
+    expect(total("expense")).toBeCloseTo(1687922.85 + 86, 2);
+    await saveAppData(storage, loaded);
+    expect(await loadAppData(storage)).toEqual(loaded);
+
+    const editedDemo = { ...legacyRecords[0], amount: 13000 };
+    await saveAppData(storage, { budget, records: [editedDemo] });
+    expect((await loadAppData(storage)).records).toContainEqual(editedDemo);
+  });
+
   it("loads fallback data when no saved snapshot exists", async () => {
     const storage = new MemoryStorage();
 
@@ -83,7 +144,7 @@ describe("storage", () => {
     const loaded = await loadAppData(storage);
 
     expect(loaded.budget.monthlyBudget).toBe(3000);
-    expect(loaded.records[0]).toEqual(savedRecord);
+    expect(loaded.records).toContainEqual(savedRecord);
     expect(loaded.records.some((record) => record.id.startsWith("history-"))).toBe(true);
   });
 
@@ -93,4 +154,13 @@ describe("storage", () => {
 
     await expect(loadAppData(storage)).resolves.toEqual(sampleData);
   });
+});
+
+it("backfills imported subcategories into old caches without replacing user edits", async () => {
+  const storage = new MemoryStorage();
+  const source = sampleData.records.find((record) => record.subcategory)!;
+  const { subcategory, ...oldRecord } = source;
+  await saveAppData(storage, { ...sampleData, records: [{ ...oldRecord, note: "用户修改的备注" }] });
+  const loaded = await loadAppData(storage);
+  expect(loaded.records.find((record) => record.id === source.id)).toEqual({ ...source, note: "用户修改的备注" });
 });

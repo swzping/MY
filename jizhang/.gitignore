@@ -2,3 +2,7 @@
 .expo/
 node_modules/
 dist/
+
+.excel-backups/
+*.sync.lock
+__pycache__/

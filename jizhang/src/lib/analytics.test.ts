@@ -1,6 +1,9 @@
 import { describe, expect, it } from "vitest";
 import {
   buildSevenDayTrend,
+  getCategoryRanking,
+  getCategoryBreakdown,
+  getSubcategoryRecords,
   getLatestRecordDate,
   getBudgetStatus,
   getCategorySpending,
@@ -213,4 +216,59 @@ describe("analytics", () => {
     ]);
     expect(getExpenseRecordsByCategory(reportRecords, "食", "2026-08")).toEqual([reportRecords[0]]);
   });
+});
+
+
+describe("all-time category totals", () => {
+  it("separates income and expenses across years, sorts totals, and handles empty data", () => {
+    const base = records[0];
+    const input: Transaction[] = [
+      { ...base, id: "a", type: "income", category: "工资", amount: 100, date: "2023-01-01" },
+      { ...base, id: "b", type: "income", category: "工资", amount: 200, date: "2026-01-01" },
+      { ...base, id: "c", type: "income", category: "礼金", amount: 100 },
+      { ...base, id: "d", type: "expense", category: "工资", amount: 50 },
+    ];
+    expect(getCategoryRanking(input, "income")).toEqual([
+      { category: "工资", amount: 300, percent: 75 },
+      { category: "礼金", amount: 100, percent: 25 },
+    ]);
+    expect(getCategoryRanking(input, "expense")).toEqual([
+      { category: "工资", amount: 50, percent: 100 },
+    ]);
+    expect(getCategoryRanking([], "income")).toEqual([]);
+  });
+});
+
+it("groups subcategories within their own parent and transaction type", () => {
+  const base = records[0];
+  const input: Transaction[] = [
+    { ...base, category: "食", subcategory: "餐饮", amount: 60 },
+    { ...base, category: "食", subcategory: "餐饮", amount: 20 },
+    { ...base, category: "食", subcategory: "零食", amount: 20 },
+    { ...base, category: "行", subcategory: "餐饮", amount: 10 },
+    { ...base, category: "行", amount: 30 },
+    { ...base, type: "income", category: "食", subcategory: "餐饮", amount: 500 },
+  ];
+  const result = getCategoryBreakdown(input, "expense");
+  expect(result[0].subcategories).toEqual([
+    { category: "餐饮", amount: 80, percent: 80 },
+    { category: "零食", amount: 20, percent: 20 },
+  ]);
+  expect(result[1].subcategories[0]).toEqual({ category: "未分类", amount: 30, percent: 75 });
+  expect(result.every((parent) => parent.subcategories.reduce((sum, child) => sum + child.amount, 0) === parent.amount)).toBe(true);
+  expect(getCategoryBreakdown([], "income")).toEqual([]);
+});
+
+it("filters detail records by type, parent and subcategory, newest first", () => {
+  const base = records[0];
+  const input: Transaction[] = [
+    { ...base, id: "older", category: "食", subcategory: "餐饮", date: "2020-01-01" },
+    { ...base, id: "newer", category: "食", subcategory: "餐饮", date: "2026-01-01" },
+    { ...base, id: "other-parent", category: "行", subcategory: "餐饮" },
+    { ...base, id: "income", type: "income", category: "食", subcategory: "餐饮" },
+    { ...base, id: "missing", category: "食" },
+  ];
+  expect(getSubcategoryRecords(input, "expense", "食", "餐饮").map((r) => r.id)).toEqual(["newer", "older"]);
+  expect(getSubcategoryRecords(input, "expense", "食", "未分类").map((r) => r.id)).toEqual(["missing"]);
+  expect(getSubcategoryRecords(input, "income", "食", "餐饮").map((r) => r.id)).toEqual(["income"]);
 });
