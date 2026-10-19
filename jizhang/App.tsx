@@ -49,6 +49,7 @@ import {
   getYearlyReport,
   validateRecordInput,
 } from "./src/lib/analytics";
+import SavingsTimelineScreen from "./src/components/SavingsTimelineScreen";
 import { editRecord, editableNote } from "./src/lib/editRecord";
 import { queueUnsyncedRecords, syncRecordToExcel } from "./src/lib/excelSync";
 import { loadAppData, saveAppData } from "./src/lib/storage";
@@ -56,7 +57,7 @@ import type { AppData, BudgetLevel, Transaction, TransactionType } from "./src/l
 
 const EditRecordContext = createContext<(record: Transaction) => void>(() => {});
 
-type Tab = "home" | "record" | "budget" | "analysis";
+type Tab = "home" | "record" | "budget" | "analysis" | "finance";
 
 type RecordForm = {
   type: TransactionType;
@@ -97,6 +98,7 @@ export default function App() {
   const contentScroll = useRef<ScrollView>(null);
   const scrollOffset = useRef(0);
   const overviewOffset = useRef(0);
+  const financeReturnOffset = useRef(0);
 
   function handleDetailNavigation(open: boolean) {
     if (open) overviewOffset.current = scrollOffset.current;
@@ -443,8 +445,8 @@ export default function App() {
           {editing && <RecordScreen form={form} onChange={setForm} onTypeChange={setFormType}
             onSubmit={addRecord} editing onCancel={cancelEdit} records={data.records} />}
           <View style={editing ? { display: "none" } : undefined}>
-          {activeTab === "home" && (
-            <HomeScreen onDetailNavigation={handleDetailNavigation} records={data.records} metrics={metrics} onRecord={beginNewRecord} />
+          {(activeTab === "home" || activeTab === "finance") && (
+            <View style={activeTab === "finance" ? { display: "none" } : undefined}><HomeScreen onFinance={() => { financeReturnOffset.current = scrollOffset.current; setActiveTab("finance"); contentScroll.current?.scrollTo({ y: 0, animated: false }); }} onDetailNavigation={handleDetailNavigation} records={data.records} metrics={metrics} onRecord={beginNewRecord} /></View>
           )}
           {activeTab === "record" && (
             <RecordScreen form={form} onChange={setForm} onTypeChange={setFormType} onSubmit={addRecord} records={data.records} />
@@ -459,6 +461,8 @@ export default function App() {
               onCategoryBudgetChange={updateCategoryBudget}
             />
           )}
+          {activeTab === "finance" && <SavingsTimelineScreen records={data.records}
+            onBack={() => { setActiveTab("home"); requestAnimationFrame(() => contentScroll.current?.scrollTo({ y: financeReturnOffset.current, animated: false })); }} />}
           {activeTab === "analysis" && <AnalysisScreen metrics={metrics} records={data.records} />}
           </View>
         </ScrollView>
@@ -466,7 +470,7 @@ export default function App() {
         <View style={styles.bottomNav}>
           {tabItems.map((item) => {
             const Icon = item.icon;
-            const active = item.id === activeTab;
+            const active = item.id === activeTab || (item.id === "home" && activeTab === "finance");
             return (
               <Pressable
                 accessibilityRole="button"
@@ -527,11 +531,13 @@ function HomeScreen({
   metrics,
   records,
   onRecord,
+  onFinance,
   onDetailNavigation,
 }: {
   metrics: Metrics;
   records: Transaction[];
   onRecord: () => void;
+  onFinance: () => void;
   onDetailNavigation: (open: boolean) => void;
 }) {
   const [selected, setSelected] = useState<{
@@ -576,7 +582,13 @@ function HomeScreen({
         <Text style={styles.primaryActionText}>快速记一笔</Text>
       </Pressable>
 
-      <SectionHeader icon={<WalletCards color="#16805f" size={18} />} title="累计收支总览" />
+      <Pressable accessibilityRole="button" accessibilityLabel="累计收支总览，查看还要存多久" onPress={onFinance}>
+        <View style={styles.rowBetween}>
+          <SectionHeader icon={<WalletCards color="#16805f" size={18} />} title="累计收支总览" />
+          <ChevronRight color="#16805f" size={20} />
+        </View>
+        <Text style={styles.muted}>按现在的收支，算算还要存多久</Text>
+      </Pressable>
       <Text style={styles.muted}>统计全部历史账单及手动记账</Text>
       <View style={styles.metricGrid}>
         <MetricCard label="总收入" value={formatMoney(metrics.cumulative.income)} />
@@ -1207,6 +1219,7 @@ function getTitle(tab: Tab) {
     record: "记一笔",
     budget: "预算",
     analysis: "账单分析",
+    finance: "还要存多久",
   }[tab];
 }
 
